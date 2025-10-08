@@ -1,7 +1,7 @@
-// src/pages/EditService.js
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import Footer from "../components/Footer";
 
 const API_URL = "http://localhost:5000/api/services";
 

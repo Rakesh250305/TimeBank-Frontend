@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 const API_URL = "http://localhost:5000/api/services";
 
@@ -141,7 +142,7 @@ export default function MyServices({ token }) {
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar token={token} />
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="p-6 min-h-screen max-w-7xl mx-auto">
         <h2 className="text-2xl font-bold text-blue-600 mb-6 mt-24">
           My Services
         </h2>

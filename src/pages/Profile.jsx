@@ -14,35 +14,39 @@ export default function Profile({ token }) {
   const navigate = useNavigate();
 
   // ✅ Fetch user profile
-const fetchProfile = async () => {
-  try {
-    const res = await axios.get("http://localhost:5000/api/user/profile", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const userData = {
-      ...res.data.data,
-      profilePhoto: res.data.data.profilePhoto ? `${res.data.data.profilePhoto}` : null,
-    };
+  const fetchProfile = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/user/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const userData = {
+        ...res.data.data,
+        profilePhoto: res.data.data.profilePhoto
+          ? `${res.data.data.profilePhoto}`
+          : null,
+      };
 
-    setUser({
-      ...userData,
-      requestedServices: res.data.requestedServices || [],
-    });
+      setUser({
+        ...userData,
+        requestedServices: res.data.requestedServices || [],
+      });
 
-    // after profile is fetched, also fetch applied services
-    fetchAppliedServices(res.data._id);
-  } catch (err) {
-    console.error("Fetch profile error:", err);
-  }
-};
-
+      // after profile is fetched, also fetch applied services
+      fetchAppliedServices(res.data._id);
+    } catch (err) {
+      console.error("Fetch profile error:", err);
+    }
+  };
 
   // ✅ Fetch services I applied for
   const fetchAppliedServices = async (userId) => {
     try {
-      const res = await axios.get("http://localhost:5000/api/services/applied", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.get(
+        "http://localhost:5000/api/services/applied",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       // filter services where I am the requester
       const myApplied = res.data.filter(
@@ -62,7 +66,7 @@ const fetchProfile = async () => {
   }, [token]);
 
   useEffect(() => {
-    console.log(user)
+    console.log(user);
     if (!user?._id) return;
 
     socket.emit("join", user._id);
@@ -90,7 +94,7 @@ const fetchProfile = async () => {
     <div className="flex flex-col min-h-screen font-sans">
       <Navbar token={token} />
 
-      <div className="max-w-screen mt-24 p-2">
+      <div className="max-w-screen min-h-screen mt-24 p-2">
         {/* Profile Card */}
         <div className="bg-white rounded-2xl shadow-2xl p-8 relative">
           <div
@@ -104,9 +108,8 @@ const fetchProfile = async () => {
             />
           </div>
           <h2 className="text-3xl font-bold text-blue-600 mb-4">
-            Hello, {user?.firstname || "User"}
+            Hello, {user?.firstName || "User"} {user?.lastName || ""}
           </h2>
-          
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -114,7 +117,23 @@ const fetchProfile = async () => {
                 <strong>Email:</strong> {user.email}
               </p>
               <p className="text-gray-700">
-                <strong>Location:</strong> {user.location || "-"}
+                <strong>Location:</strong>{" "}
+                {user?.address
+                  ? [
+                      user.address.street1,
+                      user.address.street2,
+                      user.address.city,
+                      user.address.postalCode,
+                    ]
+                      .filter(Boolean)
+                      .join(", ")
+                  : "-"}
+              </p>
+              <p className="text-gray-700">
+                <strong>State:</strong> {user.address.state || "-"}
+              </p>
+              <p className="text-gray-700">
+                <strong>Country:</strong> {user.address.country || "-"}
               </p>
               <p className="text-gray-700">
                 <strong>Skills:</strong> {(user.skills || []).join(", ") || "-"}
@@ -123,7 +142,7 @@ const fetchProfile = async () => {
                 <strong>Availability:</strong> {user.availability || "-"}
               </p>
               <p className="text-gray-700">
-                <strong>Total Credits:</strong> {user.wallet || "-"}
+                <strong>Total Credits:</strong> {user.wallet || "0"}
               </p>
             </div>
           </div>

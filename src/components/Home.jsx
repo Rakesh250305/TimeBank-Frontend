@@ -9,7 +9,7 @@ export default function Home() {
     <div className="flex flex-col min-h-screen font-sans">
       {/* Navbar */}
       <nav className="flex justify-between items-center px-8 py-4 bg-white shadow-md fixed w-full z-50">
-        <div className="text-2xl font-bold text-blue-600">TB</div>
+        <div className="text-2xl font-bold text-blue-600">TimeBank</div>
         <ul className="hidden md:flex gap-6 text-gray-700 font-medium">
           <li>
             <a href="#" className="hover:text-blue-600 hover:underline">

@@ -70,7 +70,7 @@ useEffect(() => {
     <nav className="flex justify-between items-center px-8 py-4 bg-white shadow-md fixed w-full z-50">
       {/* Logo */}
       <Link to="/" className="text-2xl font-bold text-blue-600">
-        TB
+        TimeBank
       </Link>
 
       {/* Links */}

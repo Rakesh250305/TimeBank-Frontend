@@ -45,7 +45,6 @@ export default function Transactions({ token }) {
           </ul>
         )}
       </div>
-      <Footer />
    </div>
   );
 }
