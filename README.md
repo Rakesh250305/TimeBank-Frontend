@@ -64,17 +64,17 @@ TimeBank-frontend/
 ## ⚙️ Setup Instructions
 
 ### 1️⃣ Install Dependencies
----Terminal
-cd TimeBank-frontend
-npm install
+# Terminal
+- cd TimeBank-frontend
+- npm install
 
----Run the frontend
-npm run dev
+# Run the frontend
+- npm run dev
 
-Edit the API_URL inside src/api/api.js:
-export const API_URL = "http://localhost:5000/api";
+# Edit the API_URL inside src/api/api.js:
+- export const API_URL = "http://localhost:5000/api";
 
-
-Rakesh Raikwar
-Final Year B.Tech CSE | Full-Stack Web Developer
-Email: rakesh.r250305@gmail.com
+## Author
+# Rakesh Raikwar
+- Final Year B.Tech CSE | Full-Stack Web Developer
+- Email: rakesh.r250305@gmail.com
