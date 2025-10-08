@@ -61,20 +61,20 @@ TimeBank-frontend/
 ├── package.json
 └── vite.config.js
 
-## ⚙️ Setup Instructions
+# ⚙️ Setup Instructions
 
-### 1️⃣ Install Dependencies
-# Terminal
+## 1️⃣ Install Dependencies
+### Terminal
 - cd TimeBank-frontend
 - npm install
 
-# Run the frontend
+### Run the frontend
 - npm run dev
 
-# Edit the API_URL inside src/api/api.js:
+### Edit the API_URL inside src/api/api.js:
 - export const API_URL = "http://localhost:5000/api";
 
-## Author
-# Rakesh Raikwar
+### Author
+#### Rakesh Raikwar
 - Final Year B.Tech CSE | Full-Stack Web Developer
 - Email: rakesh.r250305@gmail.com
