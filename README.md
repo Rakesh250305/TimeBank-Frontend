@@ -1,16 +1,80 @@
-# React + Vite
+# 🕒 TimeBank Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The **TimeBank Frontend** is a React-based web application that connects users who want to exchange time and skills.  
+It provides a modern, user-friendly interface for signup, login, profile management, services, and community interaction.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Tech Stack
 
-## React Compiler
+- **React.js (Vite)** – Frontend framework  
+- **React Router DOM** – Navigation and routing  
+- **Axios** – API communication  
+- **Socket.io-client** – Real-time communication  
+- **Tailwind CSS / CSS Modules** – Styling  
+- **React Icons** – UI icons and visuals  
 
-The React Compiler is not enabled on this template. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🧠 Key Features
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+✅ Step-by-step modern Signup (Personal, Academic, Address, Skills, Experience, Password)  
+✅ User Login & Authentication (JWT-based)  
+✅ Profile Page with skills, experience, and wallet  
+✅ Services listing and creation  
+✅ Notifications (real-time via Socket.io)  
+✅ Footer with links (About, Contact, Privacy, Terms, Community)  
+✅ Responsive UI  
+
+---
+
+## 📂 Folder Structure
+TimeBank-frontend/
+│
+├── src/
+│ ├── components/
+│ │ ├── Navbar.jsx
+│ │ ├── Footer.jsx
+│ │ └── Home.jsx
+│ │
+│ ├── pages/
+│ │ ├── Signup.jsx
+│ │ ├── Login.jsx
+│ │ ├── Profile.jsx
+│ │ ├── Services.jsx
+│ │ ├── About.jsx
+│ │ ├── Contact.jsx
+│ │ ├── Terms.jsx
+│ │ ├── Privacy.jsx
+│ │ └── Community.jsx
+│ │
+│ ├── assets/
+│ │ └── default-profile.webp
+│ │
+│ ├── api/
+│ │ └── api.js
+│ │
+│ ├── App.jsx
+│ ├── main.jsx
+│ └── App.css
+│
+├── package.json
+└── vite.config.js
+
+## ⚙️ Setup Instructions
+
+### 1️⃣ Install Dependencies
+---Terminal
+cd TimeBank-frontend
+npm install
+
+---Run the frontend
+npm run dev
+
+Edit the API_URL inside src/api/api.js:
+export const API_URL = "http://localhost:5000/api";
+
+
+Rakesh Raikwar
+Final Year B.Tech CSE | Full-Stack Web Developer
+Email: rakesh.r250305@gmail.com
