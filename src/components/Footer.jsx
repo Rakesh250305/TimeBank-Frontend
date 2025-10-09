@@ -5,7 +5,7 @@ const Footer = () => {
     <footer className="bg-gray-800 text-gray-300 mt-auto py-6">
       <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
         {/* Navigation Links */}
-        <div className="flex flex-col md:flex-row gap-4 text-sm md:text-base">
+        <div className="flex flex-row gap-4 text-sm md:text-base">
           <Link to="/" className="hover:text-white transition">Home</Link>
           <Link to="/about" className="hover:text-white transition">About</Link>
           <Link to="/" className="hover:text-white transition">Feature</Link>
