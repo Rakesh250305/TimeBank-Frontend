@@ -3,6 +3,7 @@ import axios from "axios";
 import { signup } from "../api/api";
 import { useNavigate } from "react-router-dom";
 import login_bg from "../assets/login_page_bg.png";
+import locationData from "../data/locationData";
 
 const API_URL = "http://localhost:5000/api/auth";
 
@@ -34,6 +35,10 @@ export default function Signup({ setToken }) {
     password: "",
     confirmPassword: "",
   });
+
+  const states = Object.keys(locationData);
+  const cities = form.state ? Object.keys(locationData[form.state]) : [];
+  const postalCode = form.city ? locationData[form.state][form.city] : "";
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -69,7 +74,7 @@ export default function Signup({ setToken }) {
       if (res.data.success) {
         setOtpVerified(true);
         setError("");
-        setStep(2); // move to next step after successful verification
+        setStep(2);
       } else {
         setError("Invalid OTP");
       }
@@ -122,55 +127,104 @@ export default function Signup({ setToken }) {
     setForm({ ...form, skills: [...form.skills, ""] });
   };
 
-  const handleNext = () => {
-    // Step 1: Personal details validation
-    if (step === 1) {
-      if (!form.firstName || !form.lastName || !form.email || !form.phone) {
-        setError("Please fill all the personal details before proceeding.");
-        return;
-      }
+  const validateStep = () => {
+    switch (step) {
+      case 2: // Personal Info
+        if (!form.firstName) {
+          setError("Please enter first name");
+          return false;
+        } else if (!form.lastName) {
+          setError("Please enter last name");
+          return false;
+        }
+        if (!/^[0-9]{10,15}$/.test(form.phone)) {
+          setError("Please enter a valid phone number (10–15 digits).");
+          return false;
+        }
+
+        break;
+
+      case 3: // Academic Details
+        if (!form.academics.some((a) => a.title || a.university)) {
+          setError("Please enter at least one academic detail.");
+          return false;
+        }
+        for (const acd of form.academics) {
+          if (
+            (acd.title && (!acd.university || !acd.percentage || !acd.year)) ||
+            (acd.university && (!acd.title || !acd.percentage || !acd.year)) ||
+            (acd.percentage && (!acd.title || !acd.university || !acd.year)) ||
+            (acd.year && (!acd.title || !acd.university || !acd.percentage))
+          ) {
+            setError(
+              "Please complete all academic fields or leave them blank."
+            );
+            return false;
+          }
+        }
+        break;
+
+      case 4: // Address
+        if (
+          !form.street1 ||
+          !form.city ||
+          !form.state ||
+          !form.postalCode ||
+          !form.country
+        ) {
+          setError("Please complete all required address fields.");
+          return false;
+        }
+        break;
+
+      case 5: // Skills
+        if (!form.skills.some((s) => s.trim() !== "")) {
+          setError("Please enter at least two skill.");
+          return false;
+        }
+        break;
+
+      case 6: // Experience
+        if (!form.experiences.some((exp) => exp.title || exp.description)) {
+          setError("Please enter at least one experience or leave it blank.");
+          return false;
+        }
+        // Allow skipping if no experiences, but if filled — must be complete
+        for (const exp of form.experiences) {
+          if (
+            (exp.title && (!exp.description || !exp.years)) ||
+            (exp.description && (!exp.title || !exp.years)) ||
+            (exp.years && (!exp.title || !exp.description))
+          ) {
+            setError(
+              "Please complete all experience fields or leave them blank."
+            );
+            return false;
+          }
+        }
+        break;
+
+      case 7: // Password step
+        if (!form.password || !form.confirmPassword) {
+          setError("Please enter and confirm your password.");
+          return false;
+        }
+        if (form.password !== form.confirmPassword) {
+          setError("Passwords do not match.");
+          return false;
+        }
+        if (!agree) {
+          setError("You must agree to the terms and conditions.");
+          return false;
+        }
+        break;
+
+      default:
+        setError("");
     }
-
-    // Step 2: Academic details → optional (no check)
-
-    // Step 3: Address validation
-    if (step === 3) {
-      if (
-        !form.street1 ||
-        !form.city ||
-        !form.state ||
-        !form.postalCode ||
-        !form.country
-      ) {
-        setError("Please complete all address fields before proceeding.");
-        return;
-      }
-    }
-
-    // Step 4: Skills validation
-    if (step === 4) {
-      const filledSkills = form.skills.filter((s) => s.trim() !== "");
-      if (filledSkills.length < 3) {
-        setError("Please enter at least 3 skills before proceeding.");
-        return;
-      }
-    }
-
-    // Step 5: Experiences validation (optional fields allowed, but at least one title or description)
-    if (step === 5) {
-      const validExperience = form.experiences.some(
-        (exp) => exp.title.trim() !== "" || exp.description.trim() !== ""
-      );
-      if (!validExperience) {
-        setError("Please add at least one experience before proceeding.");
-        return;
-      }
-    }
-
-    setStep((prev) => Math.min(prev + 1, 6));
+    setError("");
+    return true;
   };
-
-  const handlePrev = () => setStep((prev) => Math.max(prev - 1, 1));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -193,7 +247,7 @@ export default function Signup({ setToken }) {
           city: form.city,
           state: form.state,
           postalCode: form.postalCode,
-          country: form.country,
+          country: form.country || "India",
         },
         skills: form.skills.filter((s) => s.trim() !== ""),
         availability: form.availability,
@@ -220,7 +274,7 @@ export default function Signup({ setToken }) {
     }
   };
 
-  const progress = (step / 6) * 100;
+  const progress = (step / 7) * 100;
 
   return (
     <div
@@ -277,7 +331,7 @@ export default function Signup({ setToken }) {
             <h2 className="border-b border-gray-600 py-2">
               {step === 1 ? "Verify Email" : "Sign Up"}
             </h2>
-            <div className="w-full bg-gray-700 rounded-full h-2">
+            <div className="w-full bg-gray-700  rounded-full h-2">
               <div
                 className="bg-blue-600 h-2 rounded-full transition-all"
                 style={{ width: `${progress}%` }}
@@ -337,7 +391,7 @@ export default function Signup({ setToken }) {
                   placeholder="First Name"
                   value={form.firstName}
                   onChange={handleChange}
-                  className="p-3 rounded-lg bg-gray-900 text-white placeholder-gray-400"
+                  className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
                 <input
@@ -346,7 +400,7 @@ export default function Signup({ setToken }) {
                   placeholder="Last Name"
                   value={form.lastName}
                   onChange={handleChange}
-                  className="p-3 rounded-lg bg-gray-900 text-white placeholder-gray-400"
+                  className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
                 <input
@@ -355,16 +409,21 @@ export default function Signup({ setToken }) {
                   placeholder="Phone"
                   value={form.phone}
                   onChange={handleChange}
-                  className="p-3 rounded-lg bg-gray-900 text-white placeholder-gray-400"
+                  className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
-                <button
-                  type="button"
-                  onClick={() => setStep(3)}
-                  className="bg-blue-600 py-2 rounded-lg hover:bg-blue-800 transition"
-                >
-                  Next
-                </button>
+                {/* Navigation Buttons */}
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (validateStep()) setStep(3);
+                    }}
+                    className="bg-blue-600  w-[15%] p-2 rounded-lg hover:bg-blue-800 transition"
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
             )}
 
@@ -392,23 +451,25 @@ export default function Signup({ setToken }) {
                       onChange={(e) => handleAcademicChange(idx, e)}
                       className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    <input
-                      type="text"
-                      name="percentage"
-                      placeholder="Percentage"
-                      value={a.percentage}
-                      onChange={(e) => handleAcademicChange(idx, e)}
-                      className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <input
-                      type="text"
-                      name="year"
-                      placeholder="Year of Passing"
-                      value={a.year}
-                      onChange={(e) => handleAcademicChange(idx, e)}
-                      className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {idx === form.academics.length - 1 && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <input
+                        type="text"
+                        name="percentage"
+                        placeholder="Percentage"
+                        value={a.percentage}
+                        onChange={(e) => handleAcademicChange(idx, e)}
+                        className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <input
+                        type="text"
+                        name="year"
+                        placeholder="Year of Passing"
+                        value={a.year}
+                        onChange={(e) => handleAcademicChange(idx, e)}
+                        className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    {/* {idx === form.academics.length - 1 && (
                       <button
                         type="button"
                         onClick={addAcademic}
@@ -416,9 +477,53 @@ export default function Signup({ setToken }) {
                       >
                         + Add More
                       </button>
-                    )}
+                    )} */}
+                    {/* Navigation Buttons */}
+                    {/* <div className="flex justify-between mt-4">
+                      <button
+                        type="button"
+                        onClick={() => setStep(2)}
+                        className="bg-gray-900  w-[20%] p-2 rounded-lg hover:bg-gray-700 transition"
+                      >
+                        Previous
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (validateStep()) setStep(4);
+                        }}
+                        className="bg-blue-600  w-[15%] p-2 rounded-lg hover:bg-blue-800 transition"
+                      >
+                        Next
+                      </button>
+                    </div> */}
                   </div>
                 ))}
+                <button
+                  type="button"
+                  onClick={addAcademic}
+                  className="text-blue-600 font-semibold hover:underline self-start"
+                >
+                  + Add More
+                </button>
+                <div className="flex justify-between mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setStep(2)}
+                    className="bg-gray-900 w-[20%] p-2 rounded-lg hover:bg-gray-700 transition"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (validateStep()) setStep(4);
+                    }}
+                    className="bg-blue-600 w-[15%] p-2 rounded-lg hover:bg-blue-800 transition"
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
             )}
 
@@ -426,6 +531,8 @@ export default function Signup({ setToken }) {
             {step === 4 && (
               <div className="flex flex-col gap-4">
                 <h3 className="text-xl font-semibold text-blue-600">Address</h3>
+
+                {/* Street fields */}
                 <input
                   type="text"
                   name="street1"
@@ -442,38 +549,101 @@ export default function Signup({ setToken }) {
                   onChange={handleChange}
                   className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <input
-                  type="text"
-                  name="city"
-                  placeholder="City"
-                  value={form.city}
-                  onChange={handleChange}
-                  className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <input
-                  type="text"
-                  name="state"
-                  placeholder="State"
-                  value={form.state}
-                  onChange={handleChange}
-                  className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <input
-                  type="text"
-                  name="postalCode"
-                  placeholder="Postal Code / Zipcode"
-                  value={form.postalCode}
-                  onChange={handleChange}
-                  className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <input
-                  type="text"
-                  name="country"
-                  placeholder="Country"
-                  value={form.country}
-                  onChange={handleChange}
-                  className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+
+                {/* State, City, Postal, Country */}
+                <div className="grid grid-cols-2 gap-4">
+                  {/* STATE */}
+                  <select
+                    name="state"
+                    value={form.state}
+                    onChange={(e) => {
+                      const selectedState = e.target.value;
+                      setForm({
+                        ...form,
+                        state: selectedState,
+                        city: "",
+                        postalCode: "",
+                      });
+                    }}
+                    className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option className="bg-gray-800" value="">Select State</option>
+                    {Object.keys(locationData).map((state) => (
+                      <option className="bg-gray-800" key={state} value={state}>
+                        {state}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* CITY */}
+                  <select
+                    name="city"
+                    value={form.city}
+                    onChange={(e) => {
+                      const selectedCity = e.target.value;
+                      const postal =
+                        locationData[form.state]?.[selectedCity] || "";
+                      setForm({
+                        ...form,
+                        city: selectedCity,
+                        postalCode: postal,
+                      });
+                    }}
+                    className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    disabled={!form.state}
+                  >
+                    <option className="bg-gray-800" value="">Select City</option>
+                    {form.state &&
+                      Object.keys(locationData[form.state] || {}).map(
+                        (city) => (
+                          <option className="bg-gray-800" key={city} value={city}>
+                            {city}
+                          </option>
+                        )
+                      )}
+                  </select>
+
+                  {/* POSTAL CODE */}
+                  <input
+                    type="text"
+                    name="postalCode"
+                    placeholder="Postal Code / Zipcode"
+                    value={form.postalCode}
+                    onChange={handleChange}
+                    className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    readOnly
+                  />
+
+                  {/* COUNTRY */}
+                  <input
+                    type="text"
+                    name="country"
+                    placeholder="Country"
+                    value={form.country || "India"}
+                    onChange={handleChange}
+                    className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Navigation Buttons */}
+                <div className="flex justify-between mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setStep(3)}
+                    className="bg-gray-900  w-[20%] p-2 rounded-lg hover:bg-gray-700 transition"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (validateStep()) setStep(5);
+                    }}
+                    className="bg-blue-600  w-[15%] p-2 rounded-lg hover:bg-blue-800 transition"
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
             )}
 
@@ -502,11 +672,30 @@ export default function Signup({ setToken }) {
                 <input
                   type="text"
                   name="availability"
-                  placeholder="Availability (e.g., Weekends, 5 hrs/day, etc.)"
+                  placeholder="Availability (e.g., 2 AM - 6 PM)"
                   value={form.availability || ""}
                   onChange={handleChange}
                   className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
+                {/* Navigation Buttons */}
+                <div className="flex justify-between mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setStep(4)}
+                    className="bg-gray-900  w-[20%] p-2 rounded-lg hover:bg-gray-700 transition"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (validateStep()) setStep(6);
+                    }}
+                    className="bg-blue-600  w-[15%] p-2 rounded-lg hover:bg-blue-800 transition"
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
             )}
 
@@ -551,6 +740,25 @@ export default function Signup({ setToken }) {
                         + Add More Experiences
                       </button>
                     )}
+                    {/* Navigation Buttons */}
+                    <div className="flex justify-between mt-4">
+                      <button
+                        type="button"
+                        onClick={() => setStep(5)}
+                        className="bg-gray-900  w-[20%] p-2 rounded-lg hover:bg-gray-700 transition"
+                      >
+                        Previous
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (validateStep()) setStep(7);
+                        }}
+                        className="bg-blue-600  w-[15%] p-2 rounded-lg hover:bg-blue-800 transition"
+                      >
+                        Next
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -591,40 +799,21 @@ export default function Signup({ setToken }) {
                 </label>
                 {/* Navigation Buttons */}
                 <div className="flex justify-between mt-4">
-                  {step > 2 && (
-                    <button
-                      type="button"
-                      onClick={handlePrev}
-                      className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-200 transition"
-                    >
-                      Previous
-                    </button>
-                  )}
-                  {step < 7 ? (
-                    <button
-                      type="button"
-                      onClick={handleNext}
-                      className="px-4 py-2 bg-blue-600 hidden text-white rounded hover:bg-blue-700 transition ml-auto"
-                    >
-                      Next
-                    </button>
-                  ) : (
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition ml-auto"
-                    >
-                      {loading ? "Signing Up..." : "Sign Up"}
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => setStep(6)}
+                    className="bg-gray-900  w-[20%] p-2 rounded-lg hover:bg-gray-700 transition"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition ml-auto"
+                  >
+                    {loading ? "Signing Up..." : "Sign Up"}
+                  </button>
                 </div>
-                {/* <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
-                >
-                  {loading ? "Signing Up..." : "Sign Up"}
-                </button> */}
               </>
             )}
 
@@ -632,6 +821,19 @@ export default function Signup({ setToken }) {
               <p className="text-red-400 text-sm text-center mt-2">{error}</p>
             )}
           </form>
+        </div>
+        <div className="mt-10 text-center text-gray-400 text-xs border-t-1 border-gray-500 pt-5">
+          <span>About</span>
+          <span className="mx-2">|</span>
+          <span>Features</span>
+          <span className="mx-2">|</span>
+          <span>Privacy Policy</span>
+          <span className="mx-2">|</span>
+          <span>Terms & Conditions</span>
+          <span className="mx-2">|</span>
+          <span>Contact</span>
+          <span className="mx-2">|</span>
+          <span>© TimeBank, Inc. 2025</span>
         </div>
       </div>
     </div>
