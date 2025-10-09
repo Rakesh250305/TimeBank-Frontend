@@ -59,7 +59,7 @@ export default function Home() {
       {/* Hero Section */}
       <section
         id="home"
-        className="flex flex-col items-center justify-center text-center text-white h-screen bg-cover bg-center"
+        className="flex flex-col p-4 items-center justify-center text-center text-white h-screen bg-cover bg-center"
         style={{ backgroundImage: `url(${bg1})` }}
       >
         <div className="bg-black opacity-80 p-10 rounded-xl">
