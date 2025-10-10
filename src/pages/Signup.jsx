@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { signup } from "../api/api";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +15,7 @@ export default function Signup({ setToken }) {
   const [error, setError] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
+  const [timer, setTimer] = useState(0); // in seconds
   const [otp, setOtp] = useState("");
 
   const [form, setForm] = useState({
@@ -51,8 +52,10 @@ export default function Signup({ setToken }) {
     try {
       setError("");
       setLoading(true);
+
       await axios.post(`${API_URL}/send-otp`, { email: form.email });
       setOtpSent(true);
+      setTimer(120);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to send OTP");
     } finally {
@@ -209,6 +212,13 @@ export default function Signup({ setToken }) {
           setError("Please enter and confirm your password.");
           return false;
         }
+        if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/.test(form.password)) {
+          setError(
+            "Password must be at least 6 characters, include an uppercase letter, a lowercase letter, and a number."
+          );
+          return false;
+        }
+
         if (form.password !== form.confirmPassword) {
           setError("Passwords do not match.");
           return false;
@@ -264,7 +274,7 @@ export default function Signup({ setToken }) {
       const res = await signup(payload);
       setToken(res.data.token);
       localStorage.setItem("token", res.data.token);
-      navigate("/login");
+      navigate("/profile");
     } catch (err) {
       setError(
         err.response?.data?.message || "Signup failed. Please try again."
@@ -273,6 +283,17 @@ export default function Signup({ setToken }) {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    let countdown;
+    if (otpSent && timer > 0) {
+      countdown = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    }
+
+    return () => clearInterval(countdown);
+  }, [otpSent, timer]);
 
   const progress = (step / 7) * 100;
 
@@ -377,6 +398,24 @@ export default function Signup({ setToken }) {
                     >
                       {loading ? "Verifying..." : "Verify & Continue"}
                     </button>
+
+                    {/* Countdown Timer & Resend Button */}
+                    <div className="text-sm mt-2 text-gray-300 flex justify-between items-center">
+                      {timer > 0 ? (
+                        <span>
+                          Resend available in: {Math.floor(timer / 60)}:
+                          {String(timer % 60).padStart(2, "0")}
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleSendOtp}
+                          className="text-blue-500 font-semibold hover:underline"
+                        >
+                          Resend OTP
+                        </button>
+                      )}
+                    </div>
                   </>
                 )}
               </div>
@@ -565,11 +604,17 @@ export default function Signup({ setToken }) {
                         postalCode: "",
                       });
                     }}
-                    className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                   >
-                    <option className="bg-gray-800" value="">Select State</option>
+                    <option className="bg-gray-800 " value="">
+                      Select State
+                    </option>
                     {Object.keys(locationData).map((state) => (
-                      <option className="bg-gray-800" key={state} value={state}>
+                      <option
+                        className="bg-gray-800 "
+                        key={state}
+                        value={state}
+                      >
                         {state}
                       </option>
                     ))}
@@ -592,11 +637,17 @@ export default function Signup({ setToken }) {
                     className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     disabled={!form.state}
                   >
-                    <option className="bg-gray-800" value="">Select City</option>
+                    <option className="bg-gray-800" value="">
+                      Select City
+                    </option>
                     {form.state &&
                       Object.keys(locationData[form.state] || {}).map(
                         (city) => (
-                          <option className="bg-gray-800" key={city} value={city}>
+                          <option
+                            className="bg-gray-800"
+                            key={city}
+                            value={city}
+                          >
                             {city}
                           </option>
                         )
@@ -619,7 +670,7 @@ export default function Signup({ setToken }) {
                     type="text"
                     name="country"
                     placeholder="Country"
-                    value={form.country || "India"}
+                    value={form.country}
                     onChange={handleChange}
                     className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -724,7 +775,7 @@ export default function Signup({ setToken }) {
                       className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <input
-                      type="text"
+                      type="number"
                       name="years"
                       placeholder="Years of Experience"
                       value={exp.years}
@@ -740,27 +791,28 @@ export default function Signup({ setToken }) {
                         + Add More Experiences
                       </button>
                     )}
-                    {/* Navigation Buttons */}
-                    <div className="flex justify-between mt-4">
-                      <button
-                        type="button"
-                        onClick={() => setStep(5)}
-                        className="bg-gray-900  w-[20%] p-2 rounded-lg hover:bg-gray-700 transition"
-                      >
-                        Previous
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (validateStep()) setStep(7);
-                        }}
-                        className="bg-blue-600  w-[15%] p-2 rounded-lg hover:bg-blue-800 transition"
-                      >
-                        Next
-                      </button>
-                    </div>
                   </div>
                 ))}
+
+                {/* Navigation Buttons */}
+                <div className="flex justify-between mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setStep(5)}
+                    className="bg-gray-900  w-[20%] p-2 rounded-lg hover:bg-gray-700 transition"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (validateStep()) setStep(7);
+                    }}
+                    className="bg-blue-600  w-[15%] p-2 rounded-lg hover:bg-blue-800 transition"
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
             )}
 
