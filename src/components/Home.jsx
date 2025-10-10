@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import bg1 from "../assets/bg1.jpg";
+import bg1 from "../assets/dark-bg-timebank1.jpg";
+import bgvideo from "../assets/TimeBank-Darkv-videobg.mp4";
 import Footer from "./Footer";
 import { FaLaptopCode, FaHandsHelping } from "react-icons/fa";
 import { MdCurrencyExchange } from "react-icons/md";
@@ -9,7 +10,7 @@ export default function Home() {
     <div className="flex flex-col min-h-screen font-sans">
       {/* Navbar */}
       <nav className="flex justify-between items-center px-8 py-4 bg-white shadow-md fixed w-full z-50">
-        <div className="text-2xl font-bold text-blue-600">TimeBank</div>
+        <div className="text-2xl font-bold text-blue-600"><a href="#">TimeBank</a></div>
         <ul className="hidden md:flex gap-6 text-gray-700 font-medium">
           <li>
             <a href="#" className="hover:text-blue-600 hover:underline">
@@ -60,10 +61,12 @@ export default function Home() {
       <section
         id="home"
         className="flex flex-col p-4 items-center justify-center text-center text-white h-screen bg-cover bg-center"
-        style={{ backgroundImage: `url(${bg1})` }}
+        style={{ 
+          backgroundImage: `url(${bg1})`
+        }}
       >
-        <div className="bg-black opacity-80 p-10 rounded-xl">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4">
+        <div className="p-10 rounded-xl flex flex-col lg:ml-[-30%] md:ml-[-20%] ml-0 lg:items-start gap-2">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Trade Time, Not Money
           </h1>
           <p className="text-lg md:text-xl mb-6">

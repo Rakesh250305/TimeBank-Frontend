@@ -69,16 +69,16 @@ useEffect(() => {
   return (
     <nav className="flex justify-between items-center px-8 py-4 bg-white shadow-md fixed w-full z-50">
       {/* Logo */}
-      <Link to="/" className="text-2xl font-bold text-blue-600">
+      <Link to="/" className="text-2xl font-bold text-blue-600 hover:drop-shadow-md hover:drop-shadow-blue-500 ">
         TimeBank
       </Link>
 
       {/* Links */}
       <ul className="hidden md:flex gap-6 text-gray-700 font-medium">
-        <li><Link to="/">Home</Link></li>
-        <li><Link to="/service">Services</Link></li>
-        <li><Link to="/transactions">Transactions</Link></li>
-        <li><Link to="/account">Account</Link></li>
+        <li className="hover:text-blue-600 hover:underline underline-offset-2"><Link to="/profile">Home</Link></li>
+        <li className="hover:text-blue-600 hover:underline underline-offset-2"><Link to="/service">Services</Link></li>
+        <li className="hover:text-blue-600 hover:underline underline-offset-2"><Link to="/transactions">Transactions</Link></li>
+        <li className="hover:text-blue-600 hover:underline underline-offset-2"><Link to="/account">Account</Link></li>
       </ul>
 
       {/* Right Side */}
@@ -90,7 +90,7 @@ useEffect(() => {
           </span>
         )}
         {/* 🔔 Notifications */}
-        <Link to="/notifications" className="relative">
+        <Link to="/notifications" className="relative hover:shadow-lg p-1 rounded-xl hover:bg-gray-200 transition">
           <span className="text-2xl">🔔</span>
           {unreadCount > 0 && (
             <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs px-2 py-0.5 rounded-full">

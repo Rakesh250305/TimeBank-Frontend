@@ -3,6 +3,8 @@ import axios from "axios";
 import { signup } from "../api/api";
 import { useNavigate } from "react-router-dom";
 import login_bg from "../assets/login_page_bg.png";
+import googleLogo from "../assets/Google_logo.png";
+import microsoftLogo from "../assets/Microsoft-logo.png";
 import locationData from "../data/locationData";
 
 const API_URL = "http://localhost:5000/api/auth";
@@ -15,8 +17,14 @@ export default function Signup({ setToken }) {
   const [error, setError] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
-  const [timer, setTimer] = useState(0); // in seconds
+  const [timer, setTimer] = useState(0);
   const [otp, setOtp] = useState("");
+  const [passwordRules, setPasswordRules] = useState({
+    hasUppercase: false,
+    hasLowercase: false,
+    hasNumber: false,
+    hasMinLength: false,
+  });
 
   const [form, setForm] = useState({
     email: "",
@@ -41,9 +49,19 @@ export default function Signup({ setToken }) {
   const cities = form.state ? Object.keys(locationData[form.state]) : [];
   const postalCode = form.city ? locationData[form.state][form.city] : "";
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
 
+    if (name === "password") {
+      setPasswordRules({
+        hasUppercase: /[A-Z]/.test(value),
+        hasLowercase: /[a-z]/.test(value),
+        hasNumber: /\d/.test(value),
+        hasMinLength: value.length >= 6,
+      });
+    }
+  };
   const handleSendOtp = async () => {
     if (!form.email) {
       setError("Please enter an email address");
@@ -212,13 +230,13 @@ export default function Signup({ setToken }) {
           setError("Please enter and confirm your password.");
           return false;
         }
-        if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/.test(form.password)) {
-          setError(
-            "Password must be at least 6 characters, include an uppercase letter, a lowercase letter, and a number."
-          );
+
+        if (
+          !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{6,}$/.test(form.password)
+        ) {
+          setError("Enter a valid Password");
           return false;
         }
-
         if (form.password !== form.confirmPassword) {
           setError("Passwords do not match.");
           return false;
@@ -238,8 +256,7 @@ export default function Signup({ setToken }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!agree) {
-      setError("You must agree to the terms and conditions");
+    if (!validateStep()) {
       return;
     }
 
@@ -267,13 +284,11 @@ export default function Signup({ setToken }) {
         password: form.password,
         confirmPassword: form.confirmPassword,
       };
-      if (form.password !== form.confirmPassword) {
-        setError("Password and Confirm Password do not match!");
-        return;
-      }
+
       const res = await signup(payload);
       setToken(res.data.token);
       localStorage.setItem("token", res.data.token);
+      localStorage.setItem("firstLogin", "true");
       navigate("/profile");
     } catch (err) {
       setError(
@@ -302,57 +317,24 @@ export default function Signup({ setToken }) {
       className="flex justify-center items-center min-h-screen bg-cover bg-bottom"
       style={{ backgroundImage: `url(${login_bg})` }}
     >
-      <div className="bg-gray-800 shadow-2xl p-5 max-w-4xl w-[65%] text-white">
-        <h1 className="text-4xl font-bold text-center mb-2 text-blue-500">
+      <div className="bg-gray-800 shadow-2xl p-5 max-w-4xl w-[90%] lg:w-[65%] my-[10%] lg:my-0 text-white">
+        <h1 className="lg:text-4xl text-2xl font-bold text-center mb-2 text-blue-500">
           TimeBank
         </h1>
         <p className="text-center text-gray-300 mb-6">
-          Verify your email to get started
+          A place to share your skills and help others grow
         </p>
 
-        <div className="flex flex-row">
+        <div className="flex lg:flex-row flex-col">
           {/* Left Info */}
-          <div className="flex flex-col gap-5 w-[40%] border-r border-gray-600 p-5">
-            <p className="text-sm">
-              Join the community and start exchanging your time and skills with
-              others.
-            </p>
-            <button className="flex items-center justify-center gap-3 bg-gray-900 border-gray-700 border text-white p-3 rounded-lg hover:bg-gray-700 transition">
-              <img
-                src="https://www.svgrepo.com/show/475656/google-color.svg"
-                alt="Google"
-                className="w-5 h-5"
-              />
-              Sign up with Google
-            </button>
-            <button className="flex items-center justify-center gap-3 bg-gray-900 border-gray-700 border text-white p-3 rounded-lg hover:bg-gray-700 transition">
-              <img
-                src="https://www.svgrepo.com/show/448224/facebook.svg"
-                alt="Facebook"
-                className="w-5 h-5"
-              />
-              Sign up with Facebook
-            </button>
-            <p className="text-sm text-center mt-6 text-gray-300">
-              Already have an account?{" "}
-              <span
-                onClick={() => navigate("/login")}
-                className="text-blue-500 font-semibold cursor-pointer hover:underline"
-              >
-                Login
-              </span>
-            </p>
-          </div>
-
-          {/* Right Form */}
           <form
             onSubmit={handleSubmit}
-            className="flex flex-col w-[60%] px-5 gap-4"
+            className="flex flex-col w-full lg:w-[60%] lg:px-5 gap-4"
           >
             <h2 className="border-b border-gray-600 py-2">
               {step === 1 ? "Verify Email" : "Sign Up"}
             </h2>
-            <div className="w-full bg-gray-700  rounded-full h-2">
+            <div className="w-full bg-gray-700 rounded-full h-2">
               <div
                 className="bg-blue-600 h-2 rounded-full transition-all"
                 style={{ width: `${progress}%` }}
@@ -458,7 +440,7 @@ export default function Signup({ setToken }) {
                     onClick={() => {
                       if (validateStep()) setStep(3);
                     }}
-                    className="bg-blue-600  w-[15%] p-2 rounded-lg hover:bg-blue-800 transition"
+                    className="bg-blue-600 lg:w-[15%] w-[20%] p-2 rounded-lg hover:bg-blue-800 transition"
                   >
                     Next
                   </button>
@@ -508,34 +490,6 @@ export default function Signup({ setToken }) {
                         className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
-                    {/* {idx === form.academics.length - 1 && (
-                      <button
-                        type="button"
-                        onClick={addAcademic}
-                        className="text-blue-600 font-semibold hover:underline self-start"
-                      >
-                        + Add More
-                      </button>
-                    )} */}
-                    {/* Navigation Buttons */}
-                    {/* <div className="flex justify-between mt-4">
-                      <button
-                        type="button"
-                        onClick={() => setStep(2)}
-                        className="bg-gray-900  w-[20%] p-2 rounded-lg hover:bg-gray-700 transition"
-                      >
-                        Previous
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (validateStep()) setStep(4);
-                        }}
-                        className="bg-blue-600  w-[15%] p-2 rounded-lg hover:bg-blue-800 transition"
-                      >
-                        Next
-                      </button>
-                    </div> */}
                   </div>
                 ))}
                 <button
@@ -545,11 +499,12 @@ export default function Signup({ setToken }) {
                 >
                   + Add More
                 </button>
+                {/* Navigation Buttons */}
                 <div className="flex justify-between mt-4">
                   <button
                     type="button"
                     onClick={() => setStep(2)}
-                    className="bg-gray-900 w-[20%] p-2 rounded-lg hover:bg-gray-700 transition"
+                    className="bg-gray-900 lg:w-[20%] w-[30%] p-2 rounded-lg hover:bg-gray-700 transition"
                   >
                     Previous
                   </button>
@@ -558,7 +513,7 @@ export default function Signup({ setToken }) {
                     onClick={() => {
                       if (validateStep()) setStep(4);
                     }}
-                    className="bg-blue-600 w-[15%] p-2 rounded-lg hover:bg-blue-800 transition"
+                    className="bg-blue-600 lg:w-[15%] w-[20%] p-2 rounded-lg hover:bg-blue-800 transition"
                   >
                     Next
                   </button>
@@ -681,7 +636,7 @@ export default function Signup({ setToken }) {
                   <button
                     type="button"
                     onClick={() => setStep(3)}
-                    className="bg-gray-900  w-[20%] p-2 rounded-lg hover:bg-gray-700 transition"
+                    className="bg-gray-900 lg:w-[20%] w-[30%] p-2 rounded-lg hover:bg-gray-700 transition"
                   >
                     Previous
                   </button>
@@ -690,7 +645,7 @@ export default function Signup({ setToken }) {
                     onClick={() => {
                       if (validateStep()) setStep(5);
                     }}
-                    className="bg-blue-600  w-[15%] p-2 rounded-lg hover:bg-blue-800 transition"
+                    className="bg-blue-600 lg:w-[15%] w-[20%] p-2 rounded-lg hover:bg-blue-800 transition"
                   >
                     Next
                   </button>
@@ -733,7 +688,7 @@ export default function Signup({ setToken }) {
                   <button
                     type="button"
                     onClick={() => setStep(4)}
-                    className="bg-gray-900  w-[20%] p-2 rounded-lg hover:bg-gray-700 transition"
+                    className="bg-gray-900 lg:w-[20%] w-[30%] p-2 rounded-lg hover:bg-gray-700 transition"
                   >
                     Previous
                   </button>
@@ -742,7 +697,7 @@ export default function Signup({ setToken }) {
                     onClick={() => {
                       if (validateStep()) setStep(6);
                     }}
-                    className="bg-blue-600  w-[15%] p-2 rounded-lg hover:bg-blue-800 transition"
+                    className="bg-blue-600 lg:w-[15%] w-[20%] p-2 rounded-lg hover:bg-blue-800 transition"
                   >
                     Next
                   </button>
@@ -799,7 +754,7 @@ export default function Signup({ setToken }) {
                   <button
                     type="button"
                     onClick={() => setStep(5)}
-                    className="bg-gray-900  w-[20%] p-2 rounded-lg hover:bg-gray-700 transition"
+                    className="bg-gray-900 lg:w-[20%] w-[30%] p-2 rounded-lg hover:bg-gray-700 transition"
                   >
                     Previous
                   </button>
@@ -808,7 +763,7 @@ export default function Signup({ setToken }) {
                     onClick={() => {
                       if (validateStep()) setStep(7);
                     }}
-                    className="bg-blue-600  w-[15%] p-2 rounded-lg hover:bg-blue-800 transition"
+                    className="bg-blue-600 lg:w-[15%] w-[20%] p-2 rounded-lg hover:bg-blue-800 transition"
                   >
                     Next
                   </button>
@@ -828,16 +783,93 @@ export default function Signup({ setToken }) {
                   className="p-3 rounded-lg bg-gray-900 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-700"
                   required
                 />
+
+                {/* ✅ Password Requirements Auto-Checking */}
+                <div className="text-sm space-y-1 grid grid-cols-2">
+                  <label className="flex items-center gap-4">
+                    <input
+                      type="checkbox"
+                      checked={passwordRules.hasLowercase}
+                      readOnly
+                      className="h-3 w-3 accent-green-500"
+                    />
+                    <span
+                      className={
+                        passwordRules.hasLowercase
+                          ? "text-green-400"
+                          : "text-gray-400"
+                      }
+                    >
+                      At least one lowercase letter
+                    </span>
+                  </label>
+
+                  <label className="flex items-center gap-4">
+                    <input
+                      type="checkbox"
+                      checked={passwordRules.hasUppercase}
+                      readOnly
+                      className="h-3 w-3 checked:accent-green-500"
+                    />
+                    <span
+                      className={
+                        passwordRules.hasUppercase
+                          ? "text-green-400"
+                          : "text-gray-400"
+                      }
+                    >
+                      At least one uppercase letter
+                    </span>
+                  </label>
+
+                  <label className="flex items-center gap-5">
+                    <input
+                      type="checkbox"
+                      checked={passwordRules.hasNumber}
+                      readOnly
+                      className="h-3 w-3 accent-green-500"
+                    />
+                    <span
+                      className={
+                        passwordRules.hasNumber
+                          ? "text-green-400"
+                          : "text-gray-400"
+                      }
+                    >
+                      At least one number
+                    </span>
+                  </label>
+
+                  <label className="flex items-center gap-4">
+                    <input
+                      type="checkbox"
+                      checked={passwordRules.hasMinLength}
+                      readOnly
+                      className="h-3 w-3 accent-green-500"
+                    />
+                    <span
+                      className={
+                        passwordRules.hasMinLength
+                          ? "text-green-400"
+                          : "text-gray-400"
+                      }
+                    >
+                      Minimum 6 characters
+                    </span>
+                  </label>
+                </div>
+
                 <input
                   type="password"
                   name="confirmPassword"
                   placeholder="Confirm Password"
                   value={form.confirmPassword}
                   onChange={handleChange}
-                  className="p-3 rounded-lg bg-gray-900 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-700"
+                  className="p-3 rounded-lg bg-gray-900 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-700 mt-3"
                   required
                 />
-                <label className="flex items-center gap-2 text-sm">
+
+                <label className="flex items-center gap-2 text-sm mt-2">
                   <input
                     type="checkbox"
                     checked={agree}
@@ -849,15 +881,16 @@ export default function Signup({ setToken }) {
                     Terms & Conditions
                   </a>
                 </label>
-                {/* Navigation Buttons */}
+
                 <div className="flex justify-between mt-4">
                   <button
                     type="button"
                     onClick={() => setStep(6)}
-                    className="bg-gray-900  w-[20%] p-2 rounded-lg hover:bg-gray-700 transition"
+                    className="bg-gray-900 lg:w-[20%] w-[30%] p-2 rounded-lg hover:bg-gray-700 transition"
                   >
                     Previous
                   </button>
+
                   <button
                     type="submit"
                     disabled={loading}
@@ -873,6 +906,30 @@ export default function Signup({ setToken }) {
               <p className="text-red-400 text-sm text-center mt-2">{error}</p>
             )}
           </form>
+
+          {/* Right Form */}
+          <div className="flex flex-col gap-10 w-full lg:w-[40%] lg:border-l border-t lg:border-t-0 border-gray-600 py-5 lg:p-5 mt-5 lg:mt-0">
+            <p className="text-sm lg:block hidden">
+              Join the community and start exchanging your time and skills with others.
+            </p>
+            <button className="flex items-center justify-center gap-3 bg-gray-900 border-gray-700 border text-white p-3 rounded-lg hover:bg-gray-700 transition">
+              <img src={googleLogo} alt="Google" className="w-5 h-5" />
+              <p className="text-sm">Sign up with Google</p>
+            </button>
+            <button className="flex items-center justify-center gap-3 bg-gray-900 border-gray-700 border text-white p-3 rounded-lg hover:bg-gray-700 transition">
+              <img src={microsoftLogo} alt="Microsoft" className="w-5 h-5" />
+              <p className="text-sm">Sign up with Microsoft</p>
+            </button>
+            <p className="text-sm text-center lg:mt-6 text-gray-300">
+              Already have an account?{" "}
+              <span
+                onClick={() => navigate("/login")}
+                className="text-blue-500 font-semibold cursor-pointer hover:underline"
+              >
+                Login
+              </span>
+            </p>
+          </div>
         </div>
         <div className="mt-10 text-center text-gray-400 text-xs border-t-1 border-gray-500 pt-5">
           <span>About</span>

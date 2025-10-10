@@ -10,7 +10,8 @@ const socket = io("http://localhost:5000");
 
 export default function Profile({ token }) {
   const [user, setUser] = useState(null);
-  const [appliedServices, setAppliedServices] = useState([]); // services I applied for
+  const [welcome, setWelcome] = useState(false);
+  const [appliedServices, setAppliedServices] = useState([]);
   const navigate = useNavigate();
 
   // ✅ Fetch user profile
@@ -65,8 +66,18 @@ export default function Profile({ token }) {
     }
   }, [token]);
 
+    // ✅ Show congratulations popup if user just signed up
   useEffect(() => {
-    console.log(user);
+    console.log("FirstLogin:", localStorage.getItem("firstLogin")); 
+    if (localStorage.getItem("firstLogin")) {
+      setWelcome(true);
+      localStorage.removeItem("firstLogin");
+
+      setWelcome(false);
+    }
+  }, []);
+
+  useEffect(() => {
     if (!user?._id) return;
 
     socket.emit("join", user._id);
@@ -188,11 +199,43 @@ export default function Profile({ token }) {
           ) : (
             <p className="text-gray-500">
               You haven’t applied to any services yet.
-            </p>
+            </p> 
           )}
         </div>
       </div>
       <Footer />
+
+      {/* 🎉 Animated Congratulations Popup */}
+ {welcome && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-50">
+    <div className="relative bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 p-8 rounded-3xl text-center shadow-[0_0_40px_rgba(59,130,246,0.5)] border border-blue-400/30 w-[360px]">
+      {/* Decorative confetti icon */}
+      <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-pink-500 to-yellow-400 p-2 rounded-full shadow-lg">
+        <span className="text-white text-xl">🎉</span>
+      </div>
+
+      <h2 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-cyan-300 to-purple-400 mt-4">
+        Congratulations!
+      </h2>
+
+      <p className="text-gray-200 text-lg mt-2 font-medium">{user?.firstName} {user?.lastName}</p>
+
+      <p className="text-gray-400 mt-4 mb-6 leading-relaxed">
+        You’ve successfully joined TimeBank!  
+        Click below to claim your <br /> <span className="text-blue-300 text-xl font-semibold">50 Time Credits</span>.
+      </p>
+
+      <button
+        onClick={() => setWelcome(false)}
+        className="px-6 py-2 rounded-full font-semibold text-white bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 transition-all"
+      >
+        Claim
+      </button>
+    </div>
+  </div>
+)}
+
+
     </div>
   );
 }
