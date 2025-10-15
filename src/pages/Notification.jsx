@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "../components/Navbar";
+import { useNavigate } from "react-router-dom";
 
 const API_URL = "http://localhost:5000/api/notifications";
 
 export default function Notifications({ token }) {
   const [notifications, setNotifications] = useState([]);
+  const Navigate = useNavigate();
 
   const fetchNotifications = async () => {
     try {
@@ -53,6 +55,7 @@ export default function Notifications({ token }) {
             >
               {n.message}
             </li>
+            
           ))}
         </ul>
       )}

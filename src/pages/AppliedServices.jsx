@@ -2,11 +2,17 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const API_URL = "http://localhost:5000/api/services";
 
 export default function AppliedServices({ token, userId }) {
   const [services, setServices] = useState([]);
+
+  // 🔹 Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const fetchApplied = async () => {
     try {
@@ -28,23 +34,26 @@ export default function AppliedServices({ token, userId }) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchApplied();
+      toast.success("Applied successfully!");
     } catch (err) {
       console.error("Error applying to service:", err);
+      toast.error("Error applying to service.");
     }
   };
 
   // 🔹 Mark as "completion requested"
   const handleCompleteRequest = async (serviceId) => {
     try {
-      alert("Completion requested!");
       await axios.post(
         `${API_URL}/${serviceId}/request-completion`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchApplied();
+      toast.success("Completion request sent successfully!");
     } catch (err) {
       console.error("Error requesting completion:", err);
+      toast.error("Error requesting completion.");
     }
   };
 
@@ -52,93 +61,156 @@ export default function AppliedServices({ token, userId }) {
     fetchApplied();
   }, []);
 
+  // ✅ Pagination logic
+  const totalPages = Math.ceil(services.length / itemsPerPage);
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+  const currentServices = services.slice(indexOfFirst, indexOfLast);
+
+  const goToPage = (page) => {
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar token={token} />
-          
-    <div className="p-6 min-h-screen max-w-7xl mx-auto">
-      
-      <h2 className="text-2xl font-bold text-blue-600 mb-6 mt-24">
-        My Applied Services
-      </h2>
 
-      <div className="grid gap-4">
-        {services.length === 0 ? (
-          <p className="text-gray-500">You haven’t applied to any services yet.</p>
-        ) : (
-          services.map((s) => (
-            <div
-              key={s._id}
-              className="border p-4 rounded bg-white shadow flex flex-col gap-2"
-            >
-              <h3 className="text-lg font-semibold">{s.title}</h3>
-              <p>{s.description}</p>
-              <p>
-                <strong>Time Period:</strong> {s.timePeriod || "N/A"}
-              </p>
-              <p>
-                <strong>Skills Required:</strong>{" "}
-                {(s.skillsRequired || []).join(", ")}
-              </p>
-              <p>
-                <strong>Offered By:</strong> {s.offeredBy?.name || "Unknown"}
-              </p>
-              <p>
-                <strong>Status:</strong> {s.status}
-              </p>
+      <div className="p-6 min-h-screen max-w-7xl mx-auto">
+        <h2 className="text-2xl font-bold text-blue-600 mb-6 mt-24">
+          My Applied Services
+        </h2>
 
-              {/* Buttons / Status handling */}
-              <div className="flex gap-2 mt-2">
-                {s.status === "open" && s.offeredBy?._id !== userId && (
-                  <button
-                    onClick={() => handleRequest(s._id)}
-                    className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
-                  >
-                    Apply
-                  </button>
+        <div className="grid gap-4">
+          {currentServices.length === 0 ? (
+            <p className="text-gray-500">
+              You haven’t applied to any services yet.
+            </p>
+          ) : (
+            currentServices.map((s) => (
+              <div
+                key={s._id}
+                className={`border p-4 rounded bg-white shadow flex flex-col gap-1 relative
+                  ${
+                    s.status === "requested"
+                      ? "bg-red-100 text-black border-gray-400 border-3"
+                      : s.status === "processing"
+                      ? "bg-yellow-100 text-black border-yellow-500 border-3"
+                      : s.status === "completion_requested"
+                      ? "bg-red-100 text-black border-fuchsia-500 border-3"
+                      : s.status === "completed"
+                      ? "bg-blue-100 text-black border-blue-500 border-3"
+                      : "bg-red-100 text-black border-red-500 border-3"
+                  }`}
+              >
+                <h3 className="text-lg font-semibold">Title: {s.title}</h3>
+                <p>{s.description}</p>
+                <p>
+                  <strong>Time Period:</strong> {s.timePeriod || "N/A"} Hour
+                </p>
+                <p>
+                  <strong>Skills Required:</strong>{" "}
+                  {(s.skillsRequired || []).join(", ")}
+                </p>
+                <p>
+                  <strong>Offered By:</strong> {s.offeredBy?.email || "Unknown"}
+                </p>
+
+                {/* 🔹 Status Badge */}
+                <div
+                  className={`py-2 px-4 text-lg border-2 rounded-lg capitalize font-semibold absolute right-5 top-5
+                    ${
+                      s.status === "requested"
+                        ? "bg-red-100 text-gray-700 border-gray-400"
+                        : s.status === "processing"
+                        ? "bg-yellow-100 text-yellow-700 border-yellow-500"
+                        : s.status === "completion_requested"
+                        ? "bg-fuchsia-100 text-fuchsia-700 border-fuchsia-500"
+                        : s.status === "completed"
+                        ? "bg-blue-100 text-blue-700 border-blue-500"
+                        : "bg-red-100 text-red-500 border-red-500"
+                    }`}
+                >
+                  {s.status}
+                </div>
+
+                {s.approvalMessage && (
+                  <p>
+                    <strong>Owner's Message:</strong> {s.approvalMessage}
+                  </p>
                 )}
 
-                {s.status === "requested" && s.requestedBy?._id === userId && (
-                  <span className="text-yellow-600 font-semibold">
-                    ⏳ Waiting for owner approval
-                  </span>
-                )}
-
-                {s.status === "processing" && s.requestedBy?._id === userId && (
-                  <button
-                    onClick={() => handleCompleteRequest(s._id)}
-                    className="bg-purple-500 text-white px-3 py-1 rounded hover:bg-purple-900"
-                  >
-                    Mark Complete
-                  </button>
-                )}
-
-                {s.status === "completion_requested" &&
-                  s.requestedBy?._id === userId && (
-                    <span className="text-blue-600 font-semibold">
-                      ✅ Completion requested, waiting for owner confirmation
+                {/* 🔹 Buttons / Status handling */}
+                <div className="flex gap-2 mt-2">
+                  {s.status === "requested" && s.requestedBy?._id === userId && (
+                    <span className="text-yellow-600 font-semibold">
+                      ⏳ Waiting for owner approval
                     </span>
                   )}
 
-                {s.status === "processing" &&
-                  s.requestedBy?._id !== userId && (
-                    <span className="text-gray-500">
-                      In Progress / Owner Reviewing
-                    </span>
+                  {s.status === "processing" && s.requestedBy?._id === userId && (
+                    <button
+                      onClick={() => handleCompleteRequest(s._id)}
+                      className="bg-purple-500 text-white px-3 py-1 w-full rounded hover:bg-purple-900"
+                    >
+                      Mark Complete
+                    </button>
                   )}
 
-                {s.status === "completed" && (
-                  <span className="text-green-600 font-semibold">
-                    ✅ Completed
-                  </span>
-                )}
+                  {s.status === "completion_requested" &&
+                    s.requestedBy?._id === userId && (
+                      <span className="text-purple-600 font-semibold">
+                        ⏳ Completion requested, waiting for owner confirmation
+                      </span>
+                    )}
+                </div>
               </div>
-            </div>
-          ))
+            ))
+          )}
+        </div>
+
+        {/* ✅ Pagination Controls */}
+        {services.length > itemsPerPage && (
+          <div className="flex justify-center items-center gap-4 mt-4">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 bg-blue-500 rounded hover:bg-blue-700 text-white disabled:opacity-50"
+            >
+              Previous
+            </button>
+
+            <span className="text-sm text-gray-700">
+              Page {currentPage} of {totalPages}
+            </span>
+
+            <button
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 bg-blue-500 rounded hover:bg-blue-700 text-white disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         )}
       </div>
-    </div>
-    <Footer />
+
+      <Footer />
+
+      {/* ToastContainer renders the toast notifications */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </div>
   );
 }

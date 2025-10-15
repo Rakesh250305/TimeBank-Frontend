@@ -77,8 +77,9 @@ export default function EditService({ token }) {
       <input
         className="border p-2 mb-2 w-full"
         value={form.timePeriod}
-        onChange={(e) => setForm({ ...form, timePeriod: e.target.value })}
+        // onChange={(e) => setForm({ ...form, timePeriod: e.target.value })}
         placeholder="Time Period"
+        disabled
       />
       <input
         className="border p-2 mb-4 w-full"

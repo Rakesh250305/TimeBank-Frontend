@@ -40,7 +40,7 @@ export default function Signup({ setToken }) {
     country: "",
     skills: ["", "", ""],
     availability: "",
-    experiences: [{ title: "", description: "", years: "" }],
+    experiences: [{ title: "", role: "", description: "", years: "" }],
     password: "",
     confirmPassword: "",
   });
@@ -133,7 +133,7 @@ export default function Signup({ setToken }) {
       ...form,
       experiences: [
         ...form.experiences,
-        { title: "", description: "", years: "" },
+        { title: "", role: "", description: "", years: "" },
       ],
     });
   };
@@ -206,16 +206,17 @@ export default function Signup({ setToken }) {
         break;
 
       case 6: // Experience
-        if (!form.experiences.some((exp) => exp.title || exp.description)) {
+        if (!form.experiences.some((exp) => exp.title || exp.description || exp.role)) {
           setError("Please enter at least one experience or leave it blank.");
           return false;
         }
         // Allow skipping if no experiences, but if filled — must be complete
         for (const exp of form.experiences) {
           if (
-            (exp.title && (!exp.description || !exp.years)) ||
-            (exp.description && (!exp.title || !exp.years)) ||
-            (exp.years && (!exp.title || !exp.description))
+            (exp.title && (!exp.description || !exp.years || !exp.role)) ||
+            (exp.description && (!exp.title || !exp.years || !exp.role)) ||
+            (exp.role && (!exp.title || !exp.description || !exp.years)) ||
+            (exp.years && (!exp.title || !exp.description || !exp.role))
           ) {
             setError(
               "Please complete all experience fields or leave them blank."
@@ -279,7 +280,7 @@ export default function Signup({ setToken }) {
         skills: form.skills.filter((s) => s.trim() !== ""),
         availability: form.availability,
         experiences: form.experiences.filter(
-          (exp) => exp.title || exp.description
+          (exp) => exp.title || exp.role || exp.description || exp.years
         ),
         password: form.password,
         confirmPassword: form.confirmPassword,
@@ -718,6 +719,14 @@ export default function Signup({ setToken }) {
                       name="title"
                       placeholder="Title"
                       value={exp.title}
+                      onChange={(e) => handleExperienceChange(idx, e)}
+                      className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <input
+                      type="text"
+                      name="role"
+                      placeholder="Role"
+                      value={exp.role}
                       onChange={(e) => handleExperienceChange(idx, e)}
                       className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />

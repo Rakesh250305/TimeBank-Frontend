@@ -19,6 +19,7 @@ import Contact from "./components/Contact";
 import Privacy from "./components/Privacy";
 import Terms from "./components/Terms";
 import Community from "./components/Community";
+import ApplicantProfile from "./pages/ApplicantProfile";
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
@@ -136,6 +137,17 @@ function App() {
             )
           }
         />
+
+        <Route
+  path="/applicant/:id"
+  element={
+    token ? (
+      <ApplicantProfile token={token} />
+    ) : (
+      <Navigate to="/login" replace />
+    )
+  }
+/>
 
         {/* Catch-all */}
         <Route path="*" element={<Navigate to="/" replace />} />

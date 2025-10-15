@@ -2,10 +2,15 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { useNavigate } from "react-router-dom";
+import { FaStar } from "react-icons/fa";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const API_URL = "http://localhost:5000/api/services";
 
 export default function MyServices({ token }) {
+  const navigate = useNavigate();
   const [services, setServices] = useState([]);
   const [editingService, setEditingService] = useState(null);
   const [form, setForm] = useState({
@@ -15,10 +20,14 @@ export default function MyServices({ token }) {
     skillsRequired: "",
   });
 
-  // ✅ For modals
   const [modalService, setModalService] = useState(null);
-  const [modalType, setModalType] = useState(""); // "approve" | "confirmCompletion"
+  const [modalType, setModalType] = useState("");
   const [message, setMessage] = useState("");
+  const [rating, setRating] = useState(0);
+
+  // ✅ Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const fetchMyServices = async () => {
     try {
@@ -31,7 +40,6 @@ export default function MyServices({ token }) {
     }
   };
 
-  // ✅ Approve Application with message
   const handleApprove = async () => {
     try {
       await axios.put(
@@ -41,32 +49,32 @@ export default function MyServices({ token }) {
       );
       closeModal();
       fetchMyServices();
+      toast.success("Approved Successfully");
     } catch (err) {
+      toast.error("Error approving application")
       console.error("Error approving application:", err);
     }
   };
 
-  // ✅ Confirm Completion with message
   const handleConfirmCompletion = async () => {
     try {
       await axios.put(
         `${API_URL}/${modalService._id}/confirm-completion`,
-        { message },
+        { message, rating },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       closeModal();
       fetchMyServices();
-
-      // 🔄 Re-fetch wallet so Navbar updates
       await axios.get("http://localhost:5000/api/user/profile", {
         headers: { Authorization: `Bearer ${token}` },
       });
+      toast.success("Conifrmed Completion");
     } catch (err) {
+      toast.error("Error confirming completion");
       console.error("Error confirming completion:", err);
     }
   };
 
-  // ✅ Reject completion
   const handleReject = async (serviceId) => {
     try {
       await axios.put(
@@ -75,12 +83,12 @@ export default function MyServices({ token }) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchMyServices();
+      toast.Success("Completion Rejected");
     } catch (err) {
       console.error("Error rejecting completion:", err);
     }
   };
 
-  // ✅ Delete service
   const handleDelete = async (serviceId) => {
     if (!window.confirm("Are you sure you want to delete this service?"))
       return;
@@ -89,12 +97,12 @@ export default function MyServices({ token }) {
         headers: { Authorization: `Bearer ${token}` },
       });
       setServices((prev) => prev.filter((s) => s._id !== serviceId));
+      toast.success("Deleted Successfully");
     } catch (err) {
       console.error("Error deleting service:", err);
     }
   };
 
-  // ✅ Open Edit Modal
   const openEditModal = (service) => {
     setEditingService(service);
     setForm({
@@ -105,7 +113,6 @@ export default function MyServices({ token }) {
     });
   };
 
-  // ✅ Submit Edit
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -116,19 +123,19 @@ export default function MyServices({ token }) {
         prev.map((s) => (s._id === editingService._id ? res.data : s))
       );
       setEditingService(null);
+      toast.success("Updated Successfully")
     } catch (err) {
+      toast.error("Error updating service");
       console.error("Error editing service:", err);
     }
   };
 
-  // ✅ Open modal
   const openModal = (service, type) => {
     setModalService(service);
     setModalType(type);
     setMessage("");
   };
 
-  // ✅ Close modal
   const closeModal = () => {
     setModalService(null);
     setModalType("");
@@ -139,6 +146,12 @@ export default function MyServices({ token }) {
     fetchMyServices();
   }, []);
 
+  // ✅ Pagination logic
+  const totalPages = Math.ceil(services.length / itemsPerPage);
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+  const currentServices = services.slice(indexOfFirst, indexOfLast);
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar token={token} />
@@ -148,20 +161,45 @@ export default function MyServices({ token }) {
         </h2>
 
         <div className="grid gap-4">
-          {services.length === 0 ? (
+          {currentServices.length === 0 ? (
             <p className="text-gray-500">
               You haven’t created any services yet.
             </p>
           ) : (
-            services.map((s) => (
+            currentServices.map((s) => (
               <div
                 key={s._id}
-                className="border p-4 rounded bg-white shadow flex flex-col gap-2 relative"
+                className={`border p-4 rounded bg-white flex flex-col gap-1 relative
+                               ${
+                                    s.status === "open"
+                                    ? "bg-green-100 text-black border-green-500 border-3"
+                                    : s.status === "requested"
+                                    ? "bg-gray-100 text-black border-gray-400 border-3"
+                                    : s.status === "processing"
+                                    ? "bg-yellow-10 text-black border-yellow-500 border-3"
+                                    : s.status === "completion_requested"
+                                    ? "bg-red-100 text-black border-fuchsia-500 border-3"
+                                    : s.status === "completed"
+                                    ? "bg-blue-100 text-black border-blue-500 border-3"
+                                    : "bg-red-100 text-black border-red-500 border-3"
+                                }`}
               >
-                <h3 className="text-lg font-semibold">{s.title}</h3>
+                <h3 className="text-lg font-semibold">Title: {s.title}</h3>
                 <p>{s.description}</p>
-                <p>
+                <p className="capitalize"> 
                   <strong>Status:</strong> {s.status}
+                </p>
+                <p>
+                  <strong>Time Period:</strong> {s.timePeriod} hours
+                </p>
+                <p>
+                  <strong>Applied By:</strong>{" "}
+                  <span
+                    className="text-blue-600 hover:underline cursor-pointer"
+                    onClick={() => navigate(`/applicant/${s.requestedBy?._id}`)}
+                  >
+                    {s.requestedBy?.email || "N/A"}
+                  </span>
                 </p>
 
                 {s.status === "processing" && s.requestedBy && (
@@ -171,12 +209,11 @@ export default function MyServices({ token }) {
                   </p>
                 )}
 
-                {/* Application approval */}
                 {s.status === "requested" && (
-                  <div className="flex gap-2 mt-2">
+                  <div className="flex gap-2 mt-2 text-xs md:text-base">
                     <button
-                      onClick={() => openModal(s, "approve")}
-                      className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                      onClick={() => openModal(s, "approveApplication")}
+                      className="bg-green-600 w-1/2 text-white px-3 py-1 rounded hover:bg-green-700"
                     >
                       ✅ Approve Application
                     </button>
@@ -189,92 +226,107 @@ export default function MyServices({ token }) {
                         );
                         fetchMyServices();
                       }}
-                      className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                      className="bg-red-600 w-1/2 text-white px-3 py-1 rounded hover:bg-red-700"
                     >
                       ❌ Reject Application
                     </button>
                   </div>
                 )}
 
-                {/* Completion request */}
                 {(s.completionRequested ||
                   s.status === "completion_requested") &&
                   s.status !== "completed" && (
-                    <div className="flex gap-2 mt-2">
+                    <div className="flex gap-2 mt-2 text-xs md:text-base  ">
                       <button
                         onClick={() => openModal(s, "confirmCompletion")}
-                        className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                        className="bg-green-600 w-1/2 text-white px-3 py-1 rounded hover:bg-green-700"
                       >
                         ✅ Confirm Completion
                       </button>
                       <button
                         onClick={() => handleReject(s._id)}
-                        className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                        className="bg-red-600 w-1/2 text-white px-3 py-1 rounded hover:bg-red-700"
                       >
                         ❌ Reject Completion
                       </button>
                     </div>
                   )}
 
-                {/* Edit + Delete */}
-                <div className="flex gap-2 mt-3 absolute right-10">
+                <div className="flex gap-2 mt-0 lg:mt-3 absolute right-2 md:right-10">
                   <button
                     onClick={() => {
-                      if (
-                        s.status === "processing" ||
-                        s.status === "completed"
-                      ) {
+                      if (s.status !== "open") {
                         alert(
-                          "This service cannot be edited because it is already assigned."
+                          "This service can only be edited when status is Open."
                         );
                         return;
                       }
                       openEditModal(s);
                     }}
                     className={`px-3 py-1 rounded text-white ${
-                      s.status === "processing" || s.status === "completed"
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-blue-600 hover:bg-blue-700"
+                      s.status === "open"
+                        ? "bg-blue-400 hover:bg-blue-600"
+                        : "bg-gray-200 cursor-not-allowed"
                     }`}
-                    disabled={
-                      s.status === "processing" || s.status === "completed"
-                    }
+                    disabled={s.status !== "open"}
                   >
-                    ✏️ Edit
+                    ✏️
                   </button>
 
                   <button
                     onClick={() => {
-                      if (
-                        s.status === "processing" ||
-                        s.status === "completed"
-                      ) {
+                      if (s.status !== "open") {
                         alert(
-                          "This service cannot be deleted because it is already assigned to a user."
+                          "This service can only be deleted when status is Open."
                         );
                         return;
                       }
                       handleDelete(s._id);
                     }}
                     className={`px-3 py-1 rounded text-white ${
-                      s.status === "processing" || s.status === "completed"
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-red-600 hover:bg-red-700"
+                      s.status === "open"
+                        ? "bg-red-400 hover:bg-red-600"
+                        : "bg-gray-200 cursor-not-allowed"
                     }`}
-                    disabled={
-                      s.status === "processing" || s.status === "completed"
-                    }
+                    disabled={s.status !== "open"}
                   >
-                    🗑 Delete
+                    🗑
                   </button>
                 </div>
               </div>
             ))
           )}
         </div>
+
+        {/* ✅ Pagination Controls */}
+        {services.length > itemsPerPage && (
+          <div className="flex justify-center items-center gap-4 mt-4">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 bg-blue-500 rounded hover:bg-blue-700 text-white disabled:opacity-50"
+            >
+              Previous
+            </button>
+
+            <span className="text-sm text-gray-700">
+              Page {currentPage} of {totalPages}
+            </span>
+
+            <button
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 bg-blue-500 rounded hover:bg-blue-700 text-white disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Edit Modal */}
+      {/* ✅ Edit Modal */}
       {editingService && (
         <div className="fixed inset-0 bg-gray-100 bg-opacity-50 flex items-center justify-center">
           <div className="bg-white rounded-lg p-6 w-96 shadow-lg">
@@ -297,15 +349,12 @@ export default function MyServices({ token }) {
                 className="border p-2 rounded"
                 required
               />
-
               <div>
                 <input
                   type="number"
                   placeholder="Time Period"
                   value={form.timePeriod}
-                  onChange={(e) =>
-                    setForm({ ...form, timePeriod: e.target.value })
-                  }
+                  disabled
                   className="w-1/2 mr-5 border p-0.5 rounded"
                 />
                 <span className="text-gray-700">Hours</span>
@@ -345,44 +394,97 @@ export default function MyServices({ token }) {
         </div>
       )}
 
-      {/* Approve/Confirm Modal with message */}
+      {/* ✅ Approve / Confirm Modal */}
       {modalService && (
         <div className="fixed inset-0 bg-gray-300 bg-opacity-10 flex items-center justify-center">
           <div className="bg-white rounded-lg p-6 w-96 shadow-lg">
-            <h2 className="text-lg font-bold mb-4">
-              {modalType === "approve"
-                ? "Approve Application"
-                : "Confirm Completion"}
-            </h2>
-            <textarea
-              placeholder="Optional message..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="w-full border p-2 rounded mb-3"
-              rows={3}
-            />
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={closeModal}
-                className="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={
-                  modalType === "approve"
-                    ? handleApprove
-                    : handleConfirmCompletion
-                }
-                className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                OK
-              </button>
-            </div>
+            {modalType === "approveApplication" ? (
+              <>
+                <h2 className="text-lg font-bold mb-4">Approve Application</h2>
+                <textarea
+                  placeholder="Optional message..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="w-full border p-2 rounded mb-3"
+                  rows={3}
+                />
+                <div className="flex justify-end gap-2">
+                  <button
+                    onClick={closeModal}
+                    className="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleApprove}
+                    className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    OK
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="text-lg font-bold mb-4">Write a Review</h2>
+                <textarea
+                  placeholder="Add Your Review here..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="w-full border p-2 rounded mb-3"
+                  rows={3}
+                />
+
+                <div className="flex items-center space-x-1 mb-3">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setRating(star)}
+                      className="focus:outline-none"
+                    >
+                      <FaStar
+                        className={`h-6 w-6 transition-colors duration-200 ${
+                          rating >= star ? "text-yellow-400" : "text-gray-300"
+                        }`}
+                      />
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <button
+                    onClick={closeModal}
+                    className="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleConfirmCompletion}
+                    className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    OK
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
-    <Footer />
+
+      <Footer />
+      <Footer />
+       <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </div>
   );
 }

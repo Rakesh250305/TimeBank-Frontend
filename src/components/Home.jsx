@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
-import bg1 from "../assets/dark-bg-timebank1.jpg";
-import bgvideo from "../assets/TimeBank-Darkv-videobg.mp4";
+import bg1 from "../assets/bg1.jpg";
 import Footer from "./Footer";
 import { FaLaptopCode, FaHandsHelping } from "react-icons/fa";
 import { MdCurrencyExchange } from "react-icons/md";
@@ -65,7 +64,7 @@ export default function Home() {
           backgroundImage: `url(${bg1})`
         }}
       >
-        <div className="p-10 rounded-xl flex flex-col lg:ml-[-30%] md:ml-[-20%] ml-0 lg:items-start gap-2">
+        <div className="p-10 rounded-xl flex flex-col bg-black opacity-80 gap-2">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Trade Time, Not Money
           </h1>
