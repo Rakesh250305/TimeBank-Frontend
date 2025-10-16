@@ -3,16 +3,17 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-
+import { showCustomToast } from "../utils/toast";
 const API_URL = "http://localhost:5000/api/services";
 
 export default function Services({ token }) {
   const [services, setServices] = useState([]);
   const [userId, setUserId] = useState(null);
-  const [credits, setCredits] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const servicesPerPage = 5; // Adjust how many per page
   const navigate = useNavigate();
 
-  // 🔹 Get logged-in user profile
+  // Fetch logged-in user profile
   const fetchProfile = async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/user/profile", {
@@ -20,23 +21,29 @@ export default function Services({ token }) {
       });
       setUserId(res.data._id);
     } catch (err) {
-      console.error("❌ Error fetching profile:", err.response?.data || err.message);
+      console.error(
+        "❌ Error fetching profile:",
+        err.response?.data || err.message
+      );
     }
   };
 
-  // 🔹 Get open services
+  // Fetch open services
   const fetchServices = async () => {
     try {
       const res = await axios.get(`${API_URL}/open`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setServices(res.data); // ✅ backend already excludes user's own services
+      setServices(res.data);
     } catch (err) {
-      console.error("❌ Error fetching services:", err.response?.data || err.message);
+      console.error(
+        "❌ Error fetching services:",
+        err.response?.data || err.message
+      );
     }
   };
 
-  // 🔹 Apply/Request service
+  // Apply / request service handlers (same as before) ...
   const handleRequest = async (id) => {
     try {
       await axios.post(
@@ -45,67 +52,36 @@ export default function Services({ token }) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchServices();
+      showCustomToast("success", "Applied successfully", "Application send successfully")
     } catch (err) {
-      console.error("❌ Error applying service:", err.response?.data || err.message);
-    }
-  };
-
-  // 🔹 Request completion (user asks owner to confirm)
-  const handleRequestCompletion = async (id) => {
-    try {
-      await axios.post(
-        `${API_URL}/${id}/request-completion`,
-        { credits },
-        { headers: { Authorization: `Bearer ${token}` } }
+      showCustomToast("error", "Failed to apply",err);
+      console.error(
+        "❌ Error applying service:",
+        err.response?.data || err.message
       );
-      fetchServices();
-    } catch (err) {
-      console.error("❌ Error requesting completion:", err.response?.data || err.message);
     }
   };
 
-  // 🔹 Owner confirms completion
-  const handleConfirmCompletion = async (id) => {
-    try {
-      await axios.put(
-        `${API_URL}/confirm-completion/${id}`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      fetchServices();
-    } catch (err) {
-      console.error("❌ Error confirming completion:", err.response?.data || err.message);
-    }
-  };
-
-  // 🔹 Owner rejects completion
-  const handleRejectCompletion = async (id) => {
-    try {
-      await axios.put(
-        `${API_URL}/reject-completion/${id}`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      fetchServices();
-    } catch (err) {
-      console.error("❌ Error rejecting completion:", err.response?.data || err.message);
-    }
-  };
-
-  // Load profile on mount
+  // Load profile and services on mount
   useEffect(() => {
     fetchProfile();
     fetchServices();
-  }, []);;
+  }, []);
+
+  // Pagination logic
+  const totalPages = Math.ceil(services.length / servicesPerPage);
+  const startIndex = (currentPage - 1) * servicesPerPage;
+  const endIndex = startIndex + servicesPerPage;
+  const paginatedServices = services.slice(startIndex, endIndex);
 
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar token={token} />
       <div className="p-6 min-h-screen max-w-7xl mx-auto">
         {/* Header with buttons */}
-        <div className="flex justify-between items-center mt-24 mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-center mt-24 mb-6">
           <h2 className="text-2xl font-bold text-blue-600">All Services</h2>
-          <div className="flex gap-3">
+          <div className="flex flex-col md:flex-row w-full md:w-md gap-3 mt-5 md:mt-0">
             <button
               onClick={() => navigate("/applied-services")}
               className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
@@ -128,16 +104,16 @@ export default function Services({ token }) {
         </div>
 
         {/* Services List */}
-        <div className="grid gap-4">
-          {services.length === 0 ? (
+        <div className="grid gap-2">
+          {paginatedServices.length === 0 ? (
             <p className="text-gray-500">No available services right now.</p>
           ) : (
-            services.map((s) => (
+            paginatedServices.map((s) => (
               <div
                 key={s._id}
-                className="border p-4 rounded bg-white shadow flex flex-col gap-2"
+                className="border p-4 rounded bg-white shadow flex flex-col gap-1 relative"
               >
-                <h3 className="text-lg font-semibold">{s.title}</h3>
+                <h3 className="text-lg font-semibold">Title: {s.title}</h3>
                 <p>{s.description}</p>
                 <p>
                   <strong>Time Period:</strong> {s.timePeriod}
@@ -147,67 +123,71 @@ export default function Services({ token }) {
                   {(s.skillsRequired || []).join(", ")}
                 </p>
                 <p>
-                  <strong>Offered By:</strong> {s.offeredBy?.name}
+                  <strong>Offered By:</strong> {s.offeredBy?.email || "N/A"}
                 </p>
-                <p>
-                  <strong>Status:</strong> {s.status}
+                <p className="absolute top-5 right-5">
+                  <div
+                    className={`py-2 px-4 text-lg border-2 rounded-lg capitalize font-semibold
+                               ${
+                                    s.status === "open"
+                                    ? "bg-green-100 text-green-700 border-green-500"
+                                    // : s.status === "Requested"
+                                    // ? "bg-red-100 text-gray-700 border-gray-400"
+                                    // : s.status === "processing"
+                                    // ? "bg-yellow-100 text-yellow-700 border-yellow-500"
+                                    // : s.status === "completion_requested"
+                                    // ? "bg-red-100 text-fuchsia-700 border-fuchsia-500"
+                                    // : s.status === "Completed"
+                                    // ? "bg-blue-100 text-blue-700 border-blue-500"
+                                    : "bg-red-100 text-red-500 border-red-500"
+                                }`}
+                  >
+                    {s.status}
+                  </div>
                 </p>
 
-                {/* 🔹 Buttons based on status */}
-                <div className="flex gap-2 mt-2">
-                  {/* Open services */}
+                {/* Buttons based on status */}
+                <div className="flex gap-2 mt-5">
                   {s.status === "open" && (
                     <button
                       onClick={() => handleRequest(s._id)}
-                      className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                      className="bg-green-600 text-white w-full px-3 py-1 rounded hover:bg-green-700"
                     >
                       Apply
                     </button>
-                  )}
-
-                  {/* Requested */}
-                  {s.status === "requested" && s.requestedBy?._id === userId && (
-                    <span className="text-yellow-600 font-semibold">⏳ Pending</span>
-                  )}
-
-                  {/* Processing (user → request completion) */}
-                  {s.status === "processing" && s.requestedBy?._id === userId && (
-                    <button
-                      onClick={() => handleRequestCompletion(s._id)}
-                      className="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700"
-                    >
-                      Request Completion
-                    </button>
-                  )}
-
-                  {/* Completion requested (waiting for owner → show approve/reject) */}
-                  {s.status === "completion_requested" &&
-                    s.offeredBy?._id === userId && (
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleConfirmCompletion(s._id)}
-                          className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-                        >
-                          Confirm ✅
-                        </button>
-                        <button
-                          onClick={() => handleRejectCompletion(s._id)}
-                          className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-                        >
-                          Reject ❌
-                        </button>
-                      </div>
-                    )}
-
-                  {/* Completed */}
-                  {s.status === "completed" && (
-                    <span className="text-green-600 font-semibold">✅ Completed</span>
                   )}
                 </div>
               </div>
             ))
           )}
         </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-4 mt-4">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 bg-blue-500 rounded hover:bg-blue-700 text-white disabled:opacity-50"
+            >
+              Previous
+            </button>
+
+            <span className="text-sm text-gray-700">
+              Page {currentPage} of {totalPages}
+            </span>
+
+            <button
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 bg-blue-500 rounded hover:bg-blue-700 text-white disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
       <Footer />
     </div>
