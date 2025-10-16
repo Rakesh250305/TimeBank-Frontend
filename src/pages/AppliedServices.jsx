@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { showCustomToast } from "../utils/toast"; 
 
 const API_URL = "http://localhost:5000/api/services";
 
@@ -25,22 +24,6 @@ export default function AppliedServices({ token, userId }) {
     }
   };
 
-  // 🔹 Apply for a service
-  const handleRequest = async (serviceId) => {
-    try {
-      await axios.post(
-        `${API_URL}/${serviceId}/apply`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      fetchApplied();
-      toast.success("Applied successfully!");
-    } catch (err) {
-      console.error("Error applying to service:", err);
-      toast.error("Error applying to service.");
-    }
-  };
-
   // 🔹 Mark as "completion requested"
   const handleCompleteRequest = async (serviceId) => {
     try {
@@ -50,10 +33,10 @@ export default function AppliedServices({ token, userId }) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchApplied();
-      toast.success("Completion request sent successfully!");
+      showCustomToast("success", "Completion request sent", "Request for completion is sent seccessfully")
     } catch (err) {
       console.error("Error requesting completion:", err);
-      toast.error("Error requesting completion.");
+      showCustomToast("error", "Error requesting completion", err);
     }
   };
 
@@ -66,10 +49,6 @@ export default function AppliedServices({ token, userId }) {
   const indexOfLast = currentPage * itemsPerPage;
   const indexOfFirst = indexOfLast - itemsPerPage;
   const currentServices = services.slice(indexOfFirst, indexOfLast);
-
-  const goToPage = (page) => {
-    if (page >= 1 && page <= totalPages) setCurrentPage(page);
-  };
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -197,20 +176,6 @@ export default function AppliedServices({ token, userId }) {
       </div>
 
       <Footer />
-
-      {/* ToastContainer renders the toast notifications */}
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
     </div>
   );
 }

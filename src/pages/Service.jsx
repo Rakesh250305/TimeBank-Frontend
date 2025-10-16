@@ -3,15 +3,12 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
+import { showCustomToast } from "../utils/toast";
 const API_URL = "http://localhost:5000/api/services";
 
 export default function Services({ token }) {
   const [services, setServices] = useState([]);
-  // const [userId, setUserId] = useState(null);
-  // const [credits, setCredits] = useState(1);
+  const [userId, setUserId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const servicesPerPage = 5; // Adjust how many per page
   const navigate = useNavigate();
@@ -55,63 +52,15 @@ export default function Services({ token }) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchServices();
-      toast.success("Applied successfully!");
+      showCustomToast("success", "Applied successfully", "Application send successfully")
     } catch (err) {
-      toast.error("Failed to apply for the service")
+      showCustomToast("error", "Failed to apply",err);
       console.error(
         "❌ Error applying service:",
         err.response?.data || err.message
       );
     }
   };
-
-  // const handleRequestCompletion = async (id) => {
-  //   try {
-  //     await axios.post(
-  //       `${API_URL}/${id}/request-completion`,
-  //       { credits },
-  //       { headers: { Authorization: `Bearer ${token}` } }
-  //     );
-  //     fetchServices();
-  //   } catch (err) {
-  //     console.error(
-  //       "❌ Error requesting completion:",
-  //       err.response?.data || err.message
-  //     );
-  //   }
-  // };
-
-  // const handleConfirmCompletion = async (id) => {
-  //   try {
-  //     await axios.put(
-  //       `${API_URL}/confirm-completion/${id}`,
-  //       {},
-  //       { headers: { Authorization: `Bearer ${token}` } }
-  //     );
-  //     fetchServices();
-  //   } catch (err) {
-  //     console.error(
-  //       "❌ Error confirming completion:",
-  //       err.response?.data || err.message
-  //     );
-  //   }
-  // };
-
-  // const handleRejectCompletion = async (id) => {
-  //   try {
-  //     await axios.put(
-  //       `${API_URL}/reject-completion/${id}`,
-  //       {},
-  //       { headers: { Authorization: `Bearer ${token}` } }
-  //     );
-  //     fetchServices();
-  //   } catch (err) {
-  //     console.error(
-  //       "❌ Error rejecting completion:",
-  //       err.response?.data || err.message
-  //     );
-  //   }
-  // };
 
   // Load profile and services on mount
   useEffect(() => {
@@ -207,47 +156,6 @@ export default function Services({ token }) {
                       Apply
                     </button>
                   )}
-
-                  {/* {s.status === "requested" &&
-                    s.requestedBy?._id === userId && (
-                      <span className="text-yellow-600 font-semibold">
-                        ⏳ Pending
-                      </span>
-                    )}
-
-                  {s.status === "processing" &&
-                    s.requestedBy?._id === userId && (
-                      <button
-                        onClick={() => handleRequestCompletion(s._id)}
-                        className="bg-purple-600 text-white w-full px-3 py-1 rounded hover:bg-purple-700"
-                      >
-                        Request Completion
-                      </button>
-                    )}
-
-                  {s.status === "completion_requested" &&
-                    s.offeredBy?._id === userId && (
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleConfirmCompletion(s._id)}
-                          className="bg-blue-600 w-1/2 text-white px-3 py-1 rounded hover:bg-blue-700"
-                        >
-                          Confirm ✅
-                        </button>
-                        <button
-                          onClick={() => handleRejectCompletion(s._id)}
-                          className="bg-red-600 w-1/2 text-white px-3 py-1 rounded hover:bg-red-700"
-                        >
-                          Reject ❌
-                        </button>
-                      </div>
-                    )} */}
-
-                  {/* {s.status === "completed" && (
-                    <span className="text-green-600 font-semibold">
-                      ✅ Completed
-                    </span>
-                  )} */}
                 </div>
               </div>
             ))
@@ -282,18 +190,6 @@ export default function Services({ token }) {
         )}
       </div>
       <Footer />
-       <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
     </div>
   );
 }

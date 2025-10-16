@@ -275,7 +275,7 @@ export default function Profile({ token }) {
             </p>
           )}
         </div>
-
+        {/* My Reviews Recieved */}
         <div
           className="mt-8 bg-white p-6 rounded-xl shadow"
           id="review-section"

@@ -6,6 +6,8 @@ import login_bg from "../assets/login_page_bg.png";
 import googleLogo from "../assets/Google_logo.png";
 import microsoftLogo from "../assets/Microsoft-logo.png";
 import locationData from "../data/locationData";
+import FloatingField from "../components/FloatingField";
+import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
 const API_URL = "http://localhost:5000/api/auth";
 
@@ -170,6 +172,7 @@ export default function Signup({ setToken }) {
           setError("Please enter at least one academic detail.");
           return false;
         }
+
         for (const acd of form.academics) {
           if (
             (acd.title && (!acd.university || !acd.percentage || !acd.year)) ||
@@ -180,6 +183,17 @@ export default function Signup({ setToken }) {
             setError(
               "Please complete all academic fields or leave them blank."
             );
+            return false;
+          }
+
+          // **New numeric year validation**
+          if (acd.year && isNaN(Number(acd.year))) {
+            setError("Year should be  in numeric.");
+            return false;
+          }
+
+          if (acd.percentage && isNaN(Number(acd.percentage))) {
+            setError("Percentage should be in numeric.");
             return false;
           }
         }
@@ -206,7 +220,11 @@ export default function Signup({ setToken }) {
         break;
 
       case 6: // Experience
-        if (!form.experiences.some((exp) => exp.title || exp.description || exp.role)) {
+        if (
+          !form.experiences.some(
+            (exp) => exp.title || exp.description || exp.role
+          )
+        ) {
           setError("Please enter at least one experience or leave it blank.");
           return false;
         }
@@ -221,6 +239,11 @@ export default function Signup({ setToken }) {
             setError(
               "Please complete all experience fields or leave them blank."
             );
+            return false;
+          }
+
+          if (exp.years && isNaN(Number(exp.years))) {
+            setError("Year of experience should be in numeric.");
             return false;
           }
         }
@@ -345,13 +368,12 @@ export default function Signup({ setToken }) {
             {/* STEP 1 — EMAIL VERIFICATION */}
             {step === 1 && (
               <div className="flex flex-col gap-3 mt-3">
-                <input
+                <FloatingField
                   type="email"
                   name="email"
-                  placeholder="Enter your email"
+                  label="Enter your email"
                   value={form.email}
                   onChange={handleChange}
-                  className="p-3 rounded-lg bg-gray-900 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-700"
                   required
                 />
 
@@ -366,12 +388,12 @@ export default function Signup({ setToken }) {
                   </button>
                 ) : (
                   <>
-                    <input
+                    <FloatingField
                       type="text"
-                      placeholder="Enter OTP"
+                      label="Enter OTP"
                       value={otp}
                       onChange={(e) => setOtp(e.target.value)}
-                      className="p-3 rounded-lg bg-gray-900 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-700"
+                      className="p-3 rounded-lg bg-gray-800 border-gray-700 text-white  placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-700"
                     />
                     <button
                       type="button"
@@ -407,33 +429,31 @@ export default function Signup({ setToken }) {
             {/* STEP 2 — Personal Info */}
             {step === 2 && (
               <div className="flex flex-col gap-3 mt-3">
-                <input
+                <FloatingField
                   type="text"
                   name="firstName"
-                  placeholder="First Name"
+                  label="First Name"
                   value={form.firstName}
                   onChange={handleChange}
-                  className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
-                <input
+                <FloatingField
                   type="text"
                   name="lastName"
-                  placeholder="Last Name"
+                  label="Last Name"
                   value={form.lastName}
                   onChange={handleChange}
-                  className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
-                <input
+                <FloatingField
                   type="text"
                   name="phone"
-                  placeholder="Phone"
+                  label="Phone Number"
                   value={form.phone}
                   onChange={handleChange}
-                  className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
+
                 {/* Navigation Buttons */}
                 <div className="flex justify-end">
                   <button
@@ -456,39 +476,38 @@ export default function Signup({ setToken }) {
                   Academic Details
                 </h3>
                 {form.academics.map((a, idx) => (
-                  <div key={idx} className="flex flex-col gap-2">
-                    <input
+                  <div
+                    key={idx}
+                    className="flex flex-col gap-2 p-4 border-1 shadow-md border-gray-600 rounded-xl"
+                  >
+                    <FloatingField
                       type="text"
                       name="title"
-                      placeholder="Title"
+                      label="Title"
                       value={a.title}
                       onChange={(e) => handleAcademicChange(idx, e)}
-                      className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    <input
+                    <FloatingField
                       type="text"
                       name="university"
-                      placeholder="University/Board"
+                      label="University/Board"
                       value={a.university}
                       onChange={(e) => handleAcademicChange(idx, e)}
-                      className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <div className="grid grid-cols-2 gap-4">
-                      <input
+                      <FloatingField
                         type="text"
                         name="percentage"
-                        placeholder="Percentage"
+                        label="Percentage"
                         value={a.percentage}
                         onChange={(e) => handleAcademicChange(idx, e)}
-                        className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
-                      <input
+                      <FloatingField
                         type="text"
                         name="year"
-                        placeholder="Year of Passing"
+                        label="Year of Passing"
                         value={a.year}
                         onChange={(e) => handleAcademicChange(idx, e)}
-                        className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
                   </div>
@@ -524,25 +543,25 @@ export default function Signup({ setToken }) {
 
             {/* Step 4: Address */}
             {step === 4 && (
-              <div className="flex flex-col gap-4">
-                <h3 className="text-xl font-semibold text-blue-600">Address</h3>
+              <div className="flex flex-col gap-4 p-4 border-1 shadow-md border-gray-600 rounded-xl">
+                <h3 className="text-xl font-semibold text-blue-600 ">
+                  Address
+                </h3>
 
                 {/* Street fields */}
-                <input
+                <FloatingField
                   type="text"
                   name="street1"
-                  placeholder="Street Address 1"
+                  label="Street Address 1"
                   value={form.street1}
                   onChange={handleChange}
-                  className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <input
+                <FloatingField
                   type="text"
                   name="street2"
-                  placeholder="Street Address 2"
+                  label="Street Address 2"
                   value={form.street2}
                   onChange={handleChange}
-                  className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
 
                 {/* State, City, Postal, Country */}
@@ -611,24 +630,22 @@ export default function Signup({ setToken }) {
                   </select>
 
                   {/* POSTAL CODE */}
-                  <input
+                  <FloatingField
                     type="text"
                     name="postalCode"
-                    placeholder="Postal Code / Zipcode"
+                    label="Postal Code / Zipcode"
                     value={form.postalCode}
                     onChange={handleChange}
-                    className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     readOnly
                   />
 
                   {/* COUNTRY */}
-                  <input
+                  <FloatingField
                     type="text"
                     name="country"
-                    placeholder="Country"
+                    label="Country"
                     value={form.country}
                     onChange={handleChange}
-                    className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
@@ -659,13 +676,12 @@ export default function Signup({ setToken }) {
               <div className="flex flex-col gap-4">
                 <h3 className="text-xl font-semibold text-blue-600">Skills</h3>
                 {form.skills.map((s, idx) => (
-                  <input
+                  <FloatingField
                     key={idx}
                     type="text"
-                    placeholder={`Skill ${idx + 1}`}
+                    label={`Skill ${idx + 1}`}
                     value={s}
                     onChange={(e) => handleSkillsChange(idx, e)}
-                    className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   />
                 ))}
@@ -676,14 +692,15 @@ export default function Signup({ setToken }) {
                 >
                   + Add More Skills
                 </button>
-                <input
+                <FloatingField
                   type="text"
                   name="availability"
-                  placeholder="Availability (e.g., 2 AM - 6 PM)"
+                  label="Availability"
                   value={form.availability || ""}
                   onChange={handleChange}
                   className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
+                <small>Availability (e.g., 2 AM - 6 PM)</small>
                 {/* Navigation Buttons */}
                 <div className="flex justify-between mt-4">
                   <button
@@ -708,43 +725,39 @@ export default function Signup({ setToken }) {
 
             {/* Step 6: Experiences */}
             {step === 6 && (
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-4 p-4 border-1 shadow-md border-gray-600 rounded-xl">
                 <h3 className="text-xl font-semibold text-blue-600">
                   Experiences
                 </h3>
                 {form.experiences.map((exp, idx) => (
                   <div key={idx} className="flex flex-col gap-2">
-                    <input
+                    <FloatingField
                       type="text"
                       name="title"
-                      placeholder="Title"
+                      label="Title"
                       value={exp.title}
                       onChange={(e) => handleExperienceChange(idx, e)}
-                      className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    <input
+                    <FloatingField
                       type="text"
                       name="role"
-                      placeholder="Role"
+                      label="Role"
                       value={exp.role}
                       onChange={(e) => handleExperienceChange(idx, e)}
-                      className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    <input
+                    <FloatingField
                       type="text"
                       name="description"
-                      placeholder="Description"
+                      label="Description"
                       value={exp.description}
                       onChange={(e) => handleExperienceChange(idx, e)}
-                      className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    <input
-                      type="number"
+                    <FloatingField
+                      type="text"
                       name="years"
-                      placeholder="Years of Experience"
+                      label="Years of Experience"
                       value={exp.years}
                       onChange={(e) => handleExperienceChange(idx, e)}
-                      className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     {idx === form.experiences.length - 1 && (
                       <button
@@ -783,18 +796,17 @@ export default function Signup({ setToken }) {
             {/* STEP 7 — Password + Agree */}
             {step === 7 && (
               <>
-                <input
+                <FloatingField
                   type="password"
                   name="password"
-                  placeholder="Password"
+                  label="Password"
                   value={form.password}
                   onChange={handleChange}
-                  className="p-3 rounded-lg bg-gray-900 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-700"
                   required
                 />
 
                 {/* ✅ Password Requirements Auto-Checking */}
-                <div className="text-sm space-y-1 grid grid-cols-2">
+                {/* <div className="text-sm space-y-1 grid grid-cols-2">
                   <label className="flex items-center gap-4">
                     <input
                       type="checkbox"
@@ -866,15 +878,88 @@ export default function Signup({ setToken }) {
                       Minimum 6 characters
                     </span>
                   </label>
+                </div> */}
+
+                <div className="text-sm space-y-2 grid grid-cols-2">
+                  {/* Lowercase */}
+                  <div className="flex items-center gap-3">
+                    {passwordRules.hasLowercase ? (
+                      <FaCheckCircle className="text-green-500 text-lg transition-all duration-300" />
+                    ) : (
+                      <FaTimesCircle className="text-red-500 text-lg transition-all duration-300" />
+                    )}
+                    <span
+                      className={`transition-colors duration-300 ${
+                        passwordRules.hasLowercase
+                          ? "text-green-400"
+                          : "text-gray-400"
+                      }`}
+                    >
+                      At least one lowercase letter
+                    </span>
+                  </div>
+
+                  {/* Uppercase */}
+                  <div className="flex items-center gap-3">
+                    {passwordRules.hasUppercase ? (
+                      <FaCheckCircle className="text-green-500 text-lg transition-all duration-300" />
+                    ) : (
+                      <FaTimesCircle className="text-red-500 text-lg transition-all duration-300" />
+                    )}
+                    <span
+                      className={`transition-colors duration-300 ${
+                        passwordRules.hasUppercase
+                          ? "text-green-400"
+                          : "text-gray-400"
+                      }`}
+                    >
+                      At least one uppercase letter
+                    </span>
+                  </div>
+
+                  {/* Number */}
+                  <div className="flex items-center gap-3">
+                    {passwordRules.hasNumber ? (
+                      <FaCheckCircle className="text-green-500 text-lg transition-all duration-300" />
+                    ) : (
+                      <FaTimesCircle className="text-red-500 text-lg transition-all duration-300" />
+                    )}
+                    <span
+                      className={`transition-colors duration-300 ${
+                        passwordRules.hasNumber
+                          ? "text-green-400"
+                          : "text-gray-400"
+                      }`}
+                    >
+                      At least one number
+                    </span>
+                  </div>
+
+                  {/* Length */}
+                  <div className="flex items-center gap-3">
+                    {passwordRules.hasMinLength ? (
+                      <FaCheckCircle className="text-green-500 text-lg transition-all duration-300" />
+                    ) : (
+                      <FaTimesCircle className="text-red-500 text-lg transition-all duration-300" />
+                    )}
+                    <span
+                      className={`transition-colors duration-300 ${
+                        passwordRules.hasMinLength
+                          ? "text-green-400"
+                          : "text-gray-400"
+                      }`}
+                    >
+                      Minimum 6 characters
+                    </span>
+                  </div>
                 </div>
 
-                <input
+                <FloatingField
                   type="password"
                   name="confirmPassword"
-                  placeholder="Confirm Password"
+                  label="Confirm Password"
                   value={form.confirmPassword}
                   onChange={handleChange}
-                  className="p-3 rounded-lg bg-gray-900 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-700 mt-3"
                   required
                 />
 
@@ -919,7 +1004,8 @@ export default function Signup({ setToken }) {
           {/* Right Form */}
           <div className="flex flex-col gap-10 w-full lg:w-[40%] lg:border-l border-t lg:border-t-0 border-gray-600 py-5 lg:p-5 mt-5 lg:mt-0">
             <p className="text-sm lg:block hidden">
-              Join the community and start exchanging your time and skills with others.
+              Join the community and start exchanging your time and skills with
+              others.
             </p>
             <button className="flex items-center justify-center gap-3 bg-gray-900 border-gray-700 border text-white p-3 rounded-lg hover:bg-gray-700 transition">
               <img src={googleLogo} alt="Google" className="w-5 h-5" />

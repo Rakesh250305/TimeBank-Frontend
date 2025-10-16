@@ -2,14 +2,14 @@ import { useState } from "react";
 import { login } from "../api/api";
 import { useNavigate } from "react-router-dom";
 import login_bg from "../assets/login_page_bg.png";
-import googleLogo from '../assets/Google_logo.png'
+import googleLogo from "../assets/Google_logo.png";
 import microsoftLogo from "../assets/Microsoft-logo.png";
 
 export default function Login({ setToken }) {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const [error , setError] = useState("");
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -27,7 +27,9 @@ export default function Login({ setToken }) {
       localStorage.setItem("token", res.data.token);
       navigate("/profile");
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed, please try again.");
+      setError(
+        err.response?.data?.message || "Login failed, please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -57,7 +59,9 @@ export default function Login({ setToken }) {
               className="flex flex-col w-full lg:w-[50%] lg:px-5 gap-1"
               onSubmit={handleSubmit}
             >
-              <h2 className="border-b-1 py-2 border-gray-500 text-xl font-bold">Login</h2>
+              <h2 className="border-b-1 py-2 border-gray-500 text-xl font-bold">
+                Login
+              </h2>
               <h2 className="py-2">Email</h2>
               <input
                 type="email"
@@ -91,8 +95,8 @@ export default function Login({ setToken }) {
               </p>
 
               {error && (
-  <p className="text-red-500 text-sm text-center mt-2">{error}</p>
-)}
+                <p className="text-red-500 text-sm text-center mt-2">{error}</p>
+              )}
             </form>
 
             {/* right Form */}
@@ -115,19 +119,11 @@ export default function Login({ setToken }) {
                 .
               </p>
               <button className="flex items-center justify-center gap-3 bg-gray-900 border-gray-700 border text-white p-3 rounded-lg hover:bg-gray-700 transition">
-                <img
-                  src={googleLogo}
-                  alt="Google"
-                  className="w-5 h-5"
-                />
+                <img src={googleLogo} alt="Google" className="w-5 h-5" />
                 <p className="text-sm">Continue with Google</p>
               </button>
               <button className="flex items-center justify-center gap-3 bg-gray-900 border-gray-700 border text-white p-3 rounded-lg hover:bg-gray-700 transition">
-                <img
-                  src={microsoftLogo}
-                  alt="Microsoft"
-                  className="w-5 h-5"
-                />
+                <img src={microsoftLogo} alt="Microsoft" className="w-5 h-5" />
                 <p className="text-sm">Continue with Microsoft</p>
               </button>
               <p className="text-sm text-center lg:mt-6 text-gray-300">

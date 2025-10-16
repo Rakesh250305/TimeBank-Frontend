@@ -4,9 +4,8 @@ import axios from "axios";
 import { Dialog } from "@headlessui/react";
 import defaultAvatar from "../assets/default-profile.webp";
 import { FaArrowLeft, FaRegEdit } from "react-icons/fa";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
+import { showCustomToast } from "../utils/toast";
+import { RiArrowGoBackLine } from "react-icons/ri";
 export default function Account({ token }) {
   const [user, setUser] = useState(null);
   const [formData, setFormData] = useState({
@@ -30,14 +29,17 @@ export default function Account({ token }) {
   const [photoModalOpen, setPhotoModalOpen] = useState(false);
   const [photoFile, setPhotoFile] = useState(null);
   const navigate = useNavigate();
-  
+
   // Fetch user profile
   const fetchProfile = async () => {
     if (!token) return;
     try {
-      const { data } = await axios.get("http://localhost:5000/api/user/profile", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const { data } = await axios.get(
+        "http://localhost:5000/api/user/profile",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       const u = data.data;
       setUser(u);
       setFormData({
@@ -96,10 +98,11 @@ export default function Account({ token }) {
       );
 
       setUser(data.data);
-      toast.success("Profile updated successfully!");
+      showCustomToast("success", "Profile updated successfully");
+      navigate('/profile');
     } catch (err) {
       console.error("Update error:", err);
-      toast.error("Failed to update profile");
+      showCustomToast("error", "Failed to update profile", err);
     } finally {
       setLoading(false);
     }
@@ -122,29 +125,40 @@ export default function Account({ token }) {
           },
         }
       );
-      setUser((prev) => ({ ...prev, profilePhoto: data.data.profilePhoto || null }));
-      toast.success("Profile photo updated!");
+      setUser((prev) => ({
+        ...prev,
+        profilePhoto: data.data.profilePhoto || null,
+      }));
+      showCustomToast(
+        "success",
+        "Profile Photo Changed",
+        "your profile photo is uploaded"
+      );
       setPhotoModalOpen(false);
       setPhotoFile(null);
     } catch (err) {
-      // console.error("Photo upload error:", err);
-      toast.error("Failed to upload photo");
+      showCustomToast("error", "Error in Updating Profile", err);
     } finally {
       setLoading(false);
     }
   };
 
   if (!user)
-    return <p className="text-center mt-24 text-lg text-gray-700">Loading profile...</p>;
+    return (
+      <p className="text-center mt-24 text-lg text-gray-700">
+        Loading profile...
+      </p>
+    );
 
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="w-full bg-white shadow-2xl rounded-2xl p-8">
         <div className="flex text-3xl font-bold text-blue-600 mb-6">
-          <FaArrowLeft onClick={() => navigate("/profile")} className="mr-5 mt-1"/>
-        <h2> Edit Profile</h2>
-        
-
+          <FaArrowLeft
+            onClick={() => navigate("/profile")}
+            className="mr-5 mt-1"
+          />
+          <h2> Edit Profile</h2>
         </div>
         {/* Profile Photo */}
         <div className="flex items-center justify-center mb-6 relative">
@@ -155,8 +169,9 @@ export default function Account({ token }) {
           />
           <div
             onClick={() => setPhotoModalOpen(true)}
-            className="bg-blue-300 rounded-full p-3 absolute bottom-0 ml-22">
-              <FaRegEdit/>
+            className="bg-blue-300 rounded-full p-3 absolute bottom-0 ml-22"
+          >
+            <FaRegEdit />
           </div>
         </div>
 
@@ -168,17 +183,23 @@ export default function Account({ token }) {
           <InputField
             label="Phone"
             value={formData.phone}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, phone: e.target.value })
+            }
           />
           <InputField
             label="Street 1"
             value={formData.street1}
-            onChange={(e) => setFormData({ ...formData, street1: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, street1: e.target.value })
+            }
           />
           <InputField
             label="Street 2"
             value={formData.street2}
-            onChange={(e) => setFormData({ ...formData, street2: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, street2: e.target.value })
+            }
           />
           <InputField
             label="City"
@@ -188,27 +209,37 @@ export default function Account({ token }) {
           <InputField
             label="State"
             value={formData.state}
-            onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, state: e.target.value })
+            }
           />
           <InputField
             label="Postal Code"
             value={formData.postalCode}
-            onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, postalCode: e.target.value })
+            }
           />
           <InputField
             label="Country"
             value={formData.country}
-            onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, country: e.target.value })
+            }
           />
           <InputField
             label="Skills (comma separated)"
             value={formData.skills}
-            onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, skills: e.target.value })
+            }
           />
           <InputField
             label="Availability"
             value={formData.availability}
-            onChange={(e) => setFormData({ ...formData, availability: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, availability: e.target.value })
+            }
           />
           <InputField
             label="Bio"
@@ -225,7 +256,10 @@ export default function Account({ token }) {
           onAdd={() =>
             setFormData({
               ...formData,
-              academics: [...formData.academics, { title: "", university: "", percentage: "", year: "" }],
+              academics: [
+                ...formData.academics,
+                { title: "", university: "", percentage: "", year: "" },
+              ],
             })
           }
           onRemove={(idx) =>
@@ -234,18 +268,23 @@ export default function Account({ token }) {
               academics: formData.academics.filter((_, i) => i !== idx),
             })
           }
-          onChange={(updated) => setFormData({ ...formData, academics: updated })}
+          onChange={(updated) =>
+            setFormData({ ...formData, academics: updated })
+          }
         />
 
         {/* Experiences */}
         <CollapsibleList
           title="Experiences"
           items={formData.experiences}
-          fields={["title", "role" , "description", "years"]}
+          fields={["title", "role", "description", "years"]}
           onAdd={() =>
             setFormData({
               ...formData,
-              experiences: [...formData.experiences, { title: "", role: "", description: "", years: "" }],
+              experiences: [
+                ...formData.experiences,
+                { title: "", role: "", description: "", years: "" },
+              ],
             })
           }
           onRemove={(idx) =>
@@ -254,35 +293,50 @@ export default function Account({ token }) {
               experiences: formData.experiences.filter((_, i) => i !== idx),
             })
           }
-          onChange={(updated) => setFormData({ ...formData, experiences: updated })}
+          onChange={(updated) =>
+            setFormData({ ...formData, experiences: updated })
+          }
         />
 
         {/* Action Buttons */}
-        <div className="mt-6 flex lg:justify-center justify-between lg:gap-20 items-center">
+        <div className="mt-6 flex lg:justify-evenly justify-between lg:gap-20 items-center">
           <button
             onClick={() => navigate("/profile")}
-            className="px-6 py-3 bg-gray-500 text-white font-semibold rounded-xl hover:bg-gray-700 transition"
-          >
-            Cancel 
+            className="flex gap-2 px-6 py-3 bg-gray-500 text-white font-semibold rounded-xl hover:bg-gray-700 transition"
+          > 
+            <RiArrowGoBackLine className="mt-1"/> Cancel
           </button>
           <button
-            onClick={handleUpdate}
-            disabled={loading}
-            className="px-6 py-3 bg-green-500 text-white font-semibold rounded-xl hover:bg-green-600 transition"
-          >
-            {loading ? "Saving..." : "Update Profile"}
-          </button>
-
-          
+        onClick={handleUpdate}
+        disabled={loading}
+        className={`px-6 py-3 rounded-xl font-semibold text-white transition ${
+          loading
+            ? "bg-blue-300 cursor-not-allowed"
+            : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+        }`}
+      >
+        {loading ? "Saving..." : "Update Profile"}
+      </button>
         </div>
       </div>
 
       {/* Modal for Photo Upload */}
-      <Dialog open={photoModalOpen} onClose={() => setPhotoModalOpen(false)} className="fixed z-50 inset-0 overflow-y-auto">
+      <Dialog
+        open={photoModalOpen}
+        onClose={() => setPhotoModalOpen(false)}
+        className="fixed z-50 inset-0 overflow-y-auto"
+      >
         <div className="flex items-center justify-center min-h-screen px-4">
           <Dialog.Panel className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
-            <Dialog.Title className="text-xl font-bold mb-4">Upload Profile Photo</Dialog.Title>
-            <input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files[0])} className="bg-gray-400 w-[70%] px-5 py-2 border-2 rounded-xl" ></input>
+            <Dialog.Title className="text-xl font-bold mb-4">
+              Upload Profile Photo
+            </Dialog.Title>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setPhotoFile(e.target.files[0])}
+              className="bg-gray-400 w-[70%] px-5 py-2 border-2 rounded-xl"
+            ></input>
             <div className="mt-4 flex justify-end gap-2">
               <button
                 onClick={() => setPhotoModalOpen(false)}
@@ -300,9 +354,7 @@ export default function Account({ token }) {
           </Dialog.Panel>
         </div>
       </Dialog>
-      <ToastContainer />
     </div>
-    
   );
 }
 
@@ -322,7 +374,14 @@ const InputField = ({ label, value, onChange, disabled = false }) => (
 );
 
 // Collapsible List (Academics/Experiences)
-const CollapsibleList = ({ title, items, fields, onAdd, onRemove, onChange }) => {
+const CollapsibleList = ({
+  title,
+  items,
+  fields,
+  onAdd,
+  onRemove,
+  onChange,
+}) => {
   const [openIndices, setOpenIndices] = useState(items.map(() => true));
 
   const toggleOpen = (idx) => {
@@ -349,16 +408,39 @@ const CollapsibleList = ({ title, items, fields, onAdd, onRemove, onChange }) =>
     <div className="mt-6">
       <h3 className="text-2xl font-semibold text-gray-700 mb-2">{title}</h3>
       {items.map((item, idx) => (
-        <div key={idx} className="border p-4 rounded-xl mb-4 bg-gray-50 relative">
+        <div
+          key={idx}
+          className="border p-4 rounded-xl mb-4 bg-gray-50 relative"
+        >
           <div className="flex justify-between items-center mb-2">
-            <span className="font-semibold">{title.slice(0, -1)} {idx + 1}</span>
+            <span className="font-semibold">
+              {title.slice(0, -1)} {idx + 1}
+            </span>
             <div className="space-x-2">
-              <button onClick={() => toggleOpen(idx)} className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300">
+              <button
+                onClick={() => toggleOpen(idx)}
+                className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+              >
                 {openIndices[idx] ? "▲" : "▼"}
               </button>
-              <button onClick={() => moveUp(idx)} className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300">↑</button>
-              <button onClick={() => moveDown(idx)} className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300">↓</button>
-              <button onClick={() => onRemove(idx)} className="px-2 py-1 bg-red-200 rounded hover:bg-red-300">✕</button>
+              <button
+                onClick={() => moveUp(idx)}
+                className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+              >
+                ↑
+              </button>
+              <button
+                onClick={() => moveDown(idx)}
+                className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+              >
+                ↓
+              </button>
+              <button
+                onClick={() => onRemove(idx)}
+                className="px-2 py-1 bg-red-200 rounded hover:bg-red-300"
+              >
+                ✕
+              </button>
             </div>
           </div>
           {openIndices[idx] && (
@@ -379,21 +461,12 @@ const CollapsibleList = ({ title, items, fields, onAdd, onRemove, onChange }) =>
           )}
         </div>
       ))}
-      <button onClick={onAdd} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+      <button
+        onClick={onAdd}
+        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+      >
         Add {title.slice(0, -1)}
       </button>
     </div>
-
-    
   );
-  
 };
-toast("Custom toast", {
-  position: "top-right",
-  autoClose: 3000,
-  hideProgressBar: false,
-  closeOnClick: true,
-  pauseOnHover: true,
-  draggable: true,
-  theme: "light",
-});

@@ -3,9 +3,17 @@ import axios from "axios";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useNavigate } from "react-router-dom";
-import { FaStar } from "react-icons/fa";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { showCustomToast } from "../utils/toast";
+
+import {
+  FaClipboardList,
+  FaRegClock,
+  FaStar,
+  FaTools,
+} from "react-icons/fa";
+import { MdTitle } from "react-icons/md";
+import { RiArrowGoBackLine } from "react-icons/ri";
+import { IoMdSend } from "react-icons/io";
 
 const API_URL = "http://localhost:5000/api/services";
 
@@ -13,6 +21,7 @@ export default function MyServices({ token }) {
   const navigate = useNavigate();
   const [services, setServices] = useState([]);
   const [editingService, setEditingService] = useState(null);
+  const [deleteModalService, setDeleteModalService] = useState(null);
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -28,6 +37,7 @@ export default function MyServices({ token }) {
   // ✅ Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
 
   const fetchMyServices = async () => {
     try {
@@ -49,9 +59,9 @@ export default function MyServices({ token }) {
       );
       closeModal();
       fetchMyServices();
-      toast.success("Approved Successfully");
+      showCustomToast("success", "Approved Successfully","The Applicant is Approved successfully");
     } catch (err) {
-      toast.error("Error approving application")
+      showCustomToast("error", "Error approving application", err);
       console.error("Error approving application:", err);
     }
   };
@@ -68,9 +78,9 @@ export default function MyServices({ token }) {
       await axios.get("http://localhost:5000/api/user/profile", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success("Conifrmed Completion");
+      showCustomToast("success", "Conifrmed Completion","The Applicant is Confirmed for completion of the Service");
     } catch (err) {
-      toast.error("Error confirming completion");
+      showCustomToast("error", "Error confirming completion",err);
       console.error("Error confirming completion:", err);
     }
   };
@@ -83,23 +93,35 @@ export default function MyServices({ token }) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchMyServices();
-      toast.Success("Completion Rejected");
+      showCustomToast("reject", "Rejected successfully", "The applicant is rejected successsfully");
     } catch (err) {
+      showCustomToast("error", "Error rejecting completion",err);
       console.error("Error rejecting completion:", err);
     }
   };
 
-  const handleDelete = async (serviceId) => {
-    if (!window.confirm("Are you sure you want to delete this service?"))
+  const handleDelete = (service) => {
+    if (service.status !== "open") {
+      showCustomToast("warning", "This service can only be deleted when status is Open.")
       return;
+    }
+    setDeleteModalService(service);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteModalService) return;
     try {
-      await axios.delete(`${API_URL}/${serviceId}`, {
+      await axios.delete(`${API_URL}/${deleteModalService._id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setServices((prev) => prev.filter((s) => s._id !== serviceId));
-      toast.success("Deleted Successfully");
+      setServices((prev) =>
+        prev.filter((s) => s._id !== deleteModalService._id)
+      );
+      showCustomToast("success", "Deleted Successfully", "Service is deleted successfully")
+      setDeleteModalService(null);
     } catch (err) {
       console.error("Error deleting service:", err);
+      showCustomToast("error", "Error deleting service");
     }
   };
 
@@ -123,9 +145,9 @@ export default function MyServices({ token }) {
         prev.map((s) => (s._id === editingService._id ? res.data : s))
       );
       setEditingService(null);
-      toast.success("Updated Successfully")
+      showCustomToast("success", "Updated Successfully", "The service is updated successfully");
     } catch (err) {
-      toast.error("Error updating service");
+      showCustomToast("error", "Error Updating Service", err);
       console.error("Error editing service:", err);
     }
   };
@@ -171,22 +193,22 @@ export default function MyServices({ token }) {
                 key={s._id}
                 className={`border p-4 rounded bg-white flex flex-col gap-1 relative
                                ${
-                                    s.status === "open"
-                                    ? "bg-green-100 text-black border-green-500 border-3"
-                                    : s.status === "requested"
-                                    ? "bg-gray-100 text-black border-gray-400 border-3"
-                                    : s.status === "processing"
-                                    ? "bg-yellow-10 text-black border-yellow-500 border-3"
-                                    : s.status === "completion_requested"
-                                    ? "bg-red-100 text-black border-fuchsia-500 border-3"
-                                    : s.status === "completed"
-                                    ? "bg-blue-100 text-black border-blue-500 border-3"
-                                    : "bg-red-100 text-black border-red-500 border-3"
-                                }`}
+                                 s.status === "open"
+                                   ? "bg-green-100 text-black border-green-500 border-3"
+                                   : s.status === "requested"
+                                   ? "bg-gray-100 text-black border-gray-400 border-3"
+                                   : s.status === "processing"
+                                   ? "bg-yellow-10 text-black border-yellow-500 border-3"
+                                   : s.status === "completion_requested"
+                                   ? "bg-red-100 text-black border-fuchsia-500 border-3"
+                                   : s.status === "completed"
+                                   ? "bg-blue-100 text-black border-blue-500 border-3"
+                                   : "bg-red-100 text-black border-red-500 border-3"
+                               }`}
               >
                 <h3 className="text-lg font-semibold">Title: {s.title}</h3>
                 <p>{s.description}</p>
-                <p className="capitalize"> 
+                <p className="capitalize">
                   <strong>Status:</strong> {s.status}
                 </p>
                 <p>
@@ -224,6 +246,7 @@ export default function MyServices({ token }) {
                           {},
                           { headers: { Authorization: `Bearer ${token}` } }
                         );
+                        showCustomToast("reject", "Rejected Successfully")
                         fetchMyServices();
                       }}
                       className="bg-red-600 w-1/2 text-white px-3 py-1 rounded hover:bg-red-700"
@@ -274,15 +297,7 @@ export default function MyServices({ token }) {
                   </button>
 
                   <button
-                    onClick={() => {
-                      if (s.status !== "open") {
-                        alert(
-                          "This service can only be deleted when status is Open."
-                        );
-                        return;
-                      }
-                      handleDelete(s._id);
-                    }}
+                    onClick={() => handleDelete(s)}
                     className={`px-3 py-1 rounded text-white ${
                       s.status === "open"
                         ? "bg-red-400 hover:bg-red-600"
@@ -328,65 +343,98 @@ export default function MyServices({ token }) {
 
       {/* ✅ Edit Modal */}
       {editingService && (
-        <div className="fixed inset-0 bg-gray-100 bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 w-96 shadow-lg">
-            <h2 className="text-xl font-bold mb-4">Edit Service</h2>
-            <form onSubmit={handleEditSubmit} className="flex flex-col gap-3">
-              <input
-                type="text"
-                placeholder="Title"
-                value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-                className="border p-2 rounded"
-                required
-              />
-              <textarea
-                placeholder="Description"
-                value={form.description}
-                onChange={(e) =>
-                  setForm({ ...form, description: e.target.value })
-                }
-                className="border p-2 rounded"
-                required
-              />
+        <div className="fixed inset-0 px-2 bg-black/50 backdrop-blur-sm flex items-center justify-center z-10">
+          <div className="bg-white md:p-10 px-5 py-10 md:mt-10 w-full max-h-screen max-w-7xl transform transition-all scale-100 animate-fadeIn">
+            <h2 className="text-2xl font-extrabold text-center mb-6 bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent">
+              Edit Service
+            </h2>
+
+            <form onSubmit={handleEditSubmit} className="flex flex-col gap-5">
+              {/* Title */}
               <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  <MdTitle className="text-blue-600" /> Service Title
+                </label>
                 <input
-                  type="number"
-                  placeholder="Time Period"
-                  value={form.timePeriod}
-                  disabled
-                  className="w-1/2 mr-5 border p-0.5 rounded"
+                  type="text"
+                  placeholder="Service title"
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  className="w-full border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-lg px-4 py-2 transition-all duration-200"
+                  required
                 />
-                <span className="text-gray-700">Hours</span>
-                <br />
-                <small className="text-gray-500">
-                  Time Period (e.g. 2 hours)
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  <FaClipboardList className="text-blue-600" /> Description
+                </label>
+                <textarea
+                  placeholder="Describe your service..."
+                  value={form.description}
+                  onChange={(e) =>
+                    setForm({ ...form, description: e.target.value })
+                  }
+                  rows={3}
+                  className="w-full border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-lg px-4 py-2 resize-none transition-all duration-200"
+                  required
+                />
+              </div>
+
+              {/* Time Period */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  <FaRegClock className="text-blue-600" /> Estimated Time
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    value={form.timePeriod}
+                    disabled
+                    className="w-1/2 border border-gray-300 bg-gray-100 text-gray-600 rounded-lg px-3 py-2 cursor-not-allowed"
+                  />
+                  <span className="text-gray-600 font-medium">hours</span>
+                </div>
+                <small className="text-gray-500 ml-1">
+                  Time Period (cannot be edited)
                 </small>
               </div>
 
-              <input
-                type="text"
-                placeholder="Skills Required"
-                value={form.skillsRequired}
-                onChange={(e) =>
-                  setForm({ ...form, skillsRequired: e.target.value })
-                }
-                className="border p-2 rounded"
-              />
+              {/* Skills Required */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  <FaTools className="text-blue-600" /> Skills Required
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. ReactJS, Communication"
+                  value={form.skillsRequired}
+                  onChange={(e) =>
+                    setForm({ ...form, skillsRequired: e.target.value })
+                  }
+                  className="w-full border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-lg px-4 py-2 transition-all duration-200"
+                />
+                <small className="text-gray-500 ml-1">
+                  Separate multiple skills with commas (,)
+                </small>
+              </div>
 
-              <div className="flex justify-end gap-2 mt-3">
+              {/* Buttons */}
+              <div className="flex justify-between gap-3 mt-6 ">
                 <button
                   type="button"
                   onClick={() => setEditingService(null)}
-                  className="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 transition-all duration-200"
                 >
-                  Cancel
+                  <RiArrowGoBackLine /> Cancel
                 </button>
+
                 <button
                   type="submit"
-                  className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-white shadow-md bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-300"
                 >
-                  Save
+                  <IoMdSend className="text-lg" /> Save Changes
                 </button>
               </div>
             </form>
@@ -394,97 +442,133 @@ export default function MyServices({ token }) {
         </div>
       )}
 
-      {/* ✅ Approve / Confirm Modal */}
-      {modalService && (
-        <div className="fixed inset-0 bg-gray-300 bg-opacity-10 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 w-96 shadow-lg">
-            {modalType === "approveApplication" ? (
-              <>
-                <h2 className="text-lg font-bold mb-4">Approve Application</h2>
-                <textarea
-                  placeholder="Optional message..."
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  className="w-full border p-2 rounded mb-3"
-                  rows={3}
-                />
-                <div className="flex justify-end gap-2">
-                  <button
-                    onClick={closeModal}
-                    className="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleApprove}
-                    className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-                  >
-                    OK
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <h2 className="text-lg font-bold mb-4">Write a Review</h2>
-                <textarea
-                  placeholder="Add Your Review here..."
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  className="w-full border p-2 rounded mb-3"
-                  rows={3}
-                />
+      {/* 🗑 Delete Confirmation Modal */}
+      {deleteModalService && (
+        <div className="fixed inset-0 p-2 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-sm shadow-2xl animate-fadeIn">
+            <h2 className="text-2xl font-extrabold text-center mb-4 bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
+              Delete Service
+            </h2>
 
-                <div className="flex items-center space-x-1 mb-3">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      onClick={() => setRating(star)}
-                      className="focus:outline-none"
-                    >
-                      <FaStar
-                        className={`h-6 w-6 transition-colors duration-200 ${
-                          rating >= star ? "text-yellow-400" : "text-gray-300"
-                        }`}
-                      />
-                    </button>
-                  ))}
-                </div>
+            <p className="text-gray-700 text-center mb-6">
+              Are you sure you want to permanently delete{" "}
+              <span className="font-semibold text-red-500">
+                “{deleteModalService.title}”
+              </span>
+              ? <br />
+              This action <strong>cannot be undone.</strong>
+            </p>
 
-                <div className="flex justify-end gap-2">
-                  <button
-                    onClick={closeModal}
-                    className="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleConfirmCompletion}
-                    className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-                  >
-                    OK
-                  </button>
-                </div>
-              </>
-            )}
+            <div className="flex justify-evenly gap-4 mt-6">
+              <button
+                onClick={() => setDeleteModalService(null)}
+                className="px-5 py-2.5 rounded-lg font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 transition-all duration-200"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleDeleteConfirm}
+                className="px-6 py-2.5 rounded-lg font-semibold text-white bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 transition-all duration-200 shadow-md"
+              >
+                Yes, Delete
+              </button>
+            </div>
           </div>
         </div>
       )}
 
+      {/* ✅ Approve / Confirm Modal */}
+      {modalService && (
+  <div className="fixed inset-0 p-2 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+    <div className="bg-white rounded-xl p-8 w-full max-w-sm shadow-2xl animate-fadeIn">
+      {modalType === "approveApplication" ? (
+        <>
+          <h2 className="text-2xl font-extrabold text-center mb-4 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            Approve Application
+          </h2>
+
+          <textarea
+            placeholder="Optional message..."
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg p-3 mb-4 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+            rows={3}
+          />
+
+          <div className="flex justify-between gap-4 mt-4">
+            <button
+              onClick={closeModal}
+              className="flex justify-center item-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 transition-all duration-200"
+            >
+              <RiArrowGoBackLine className="mt-1"/> Cancel
+            </button>
+
+            <button
+              onClick={handleApprove}
+              className="px-6 py-2.5 rounded-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md"
+            >
+              OK
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <h2 className="text-2xl font-extrabold text-center  mb-4 bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent">
+            Write a Review
+          </h2>
+
+          <textarea
+            placeholder="Add your review here..."
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg p-3 mb-1 focus:ring-2 focus:ring-yellow-400 focus:outline-none transition-all"
+            rows={3}
+          />
+
+          <div className="flex justify-start space-x-1 mb-8">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                type="button"
+                onClick={() => setRating(star)}
+                className="focus:outline-none"
+              >
+                <FaStar
+                  className={`h-7 w-7 transition-transform duration-200 ${
+                    rating >= star
+                      ? "text-yellow-400 scale-110"
+                      : "text-gray-300 hover:text-yellow-300"
+                  }`}
+                />
+              </button>
+            ))}
+          </div>
+
+          <div className="flex justify-between gap-4 mt-4">
+            <button
+              onClick={closeModal}
+              className="flex justify-center item-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 transition-all duration-200"
+            >
+              <RiArrowGoBackLine className="mt-1"/> Cancel
+            </button>
+
+            <button
+              onClick={handleConfirmCompletion}
+              className="px-6 py-2.5 rounded-lg font-semibold text-white bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 transition-all duration-200 shadow-md"
+            >
+              OK
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  </div>
+)}
+
+
       <Footer />
-      <Footer />
-       <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
+     
     </div>
   );
 }
