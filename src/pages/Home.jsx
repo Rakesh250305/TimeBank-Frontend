@@ -17,9 +17,9 @@ export default function Home() {
             </a>
           </li>
           <li>
-            <a href="/about" className="hover:text-blue-600 hover:underline">
+            <Link href="/about" className="hover:text-blue-600 hover:underline">
               About
-            </a>
+            </Link>
           </li>
           <li>
             <a href="#features" className="hover:text-blue-600 hover:underline">
@@ -27,17 +27,17 @@ export default function Home() {
             </a>
           </li>
           <li>
-            <a
+            <Link
               href="/community"
               className="hover:text-blue-600 hover:underline"
             >
               Community
-            </a>
+            </Link>
           </li>
           <li>
-            <a href="/contact" className="hover:text-blue-600 hover:underline">
+            <Link href="/contact" className="hover:text-blue-600 hover:underline">
               Contact
-            </a>
+            </Link>
           </li>
         </ul>
         <div className="flex gap-3">
