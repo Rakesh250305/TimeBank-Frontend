@@ -8,7 +8,7 @@ import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import Services from "./pages/Service";
-import Home from "./components/Home";
+import Home from "./pages/Home";
 import Account from "./pages/Account";
 import CreateService from "./pages/CreateService";
 import MyServices from "./pages/MyService";
