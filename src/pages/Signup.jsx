@@ -9,7 +9,8 @@ import locationData from "../data/locationData";
 import FloatingField from "../components/FloatingField";
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
-const API_URL = "http://localhost:5000/api/auth";
+// const API_URL = "http://localhost:5000/api/auth";
+const API_URL = "https://timebank-backend-67l5.onrender.com/api/auth";
 
 export default function Signup({ setToken }) {
   const navigate = useNavigate();

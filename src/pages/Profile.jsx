@@ -6,7 +6,8 @@ import io from "socket.io-client";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
-const socket = io("http://localhost:5000");
+// const socket = io("http://localhost:5000");
+const socket = io("https://timebank-backend-67l5.onrender.com")
 
 export default function Profile({ token }) {
   const [user, setUser] = useState(null);
@@ -20,7 +21,10 @@ export default function Profile({ token }) {
   // ✅ Fetch user profile
   const fetchProfile = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/user/profile", {
+      const res = await axios.get(
+        // "http://localhost:5000/api/user/profile", 
+        "https://timebank-backend-67l5.onrender.com/api/user/profile", 
+        {
         headers: { Authorization: `Bearer ${token}` },
       });
       const userData = {
@@ -46,7 +50,8 @@ export default function Profile({ token }) {
   const fetchAppliedServices = async (userId) => {
     try {
       const res = await axios.get(
-        "http://localhost:5000/api/services/applied",
+        // "http://localhost:5000/api/services/applied",
+        "https://timebank-backend-67l5.onrender.com/api/services/applied",
         {
           headers: { Authorization: `Bearer ${token}` },
         }

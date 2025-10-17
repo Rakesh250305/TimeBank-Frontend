@@ -4,7 +4,11 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { showCustomToast } from "../utils/toast"; 
 
-const API_URL = "http://localhost:5000/api/services";
+// const API_URL = "http://localhost:5000/api/services";
+const API_URL = "https://timebank-backend-67l5.onrender.com/api/services";
+
+
+
 
 export default function AppliedServices({ token, userId }) {
   const [services, setServices] = useState([]);

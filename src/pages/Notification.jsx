@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "../components/Navbar";
 
-const API_URL = "http://localhost:5000/api/notifications";
+// const API_URL = "http://localhost:5000/api/notifications";
+const API_URL = "https://timebank-backend-67l5.onrender.com/api/notifications";
 
 export default function Notifications({ token }) {
   const [notifications, setNotifications] = useState([]);

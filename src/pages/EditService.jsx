@@ -3,7 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Footer from "../components/Footer";
 
-const API_URL = "http://localhost:5000/api/services";
+// const API_URL = "http://localhost:5000/api/services";
+const API_URL = "https://timebank-backend-67l5.onrender.com/api/services";
 
 export default function EditService({ token }) {
   const { id } = useParams();

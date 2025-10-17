@@ -6,6 +6,7 @@ import defaultAvatar from "../assets/default-profile.webp";
 import { FaArrowLeft, FaRegEdit } from "react-icons/fa";
 import { showCustomToast } from "../utils/toast";
 import { RiArrowGoBackLine } from "react-icons/ri";
+import { RxCross2 } from "react-icons/rx";
 export default function Account({ token }) {
   const [user, setUser] = useState(null);
   const [formData, setFormData] = useState({
@@ -27,6 +28,7 @@ export default function Account({ token }) {
   });
   const [loading, setLoading] = useState(false);
   const [photoModalOpen, setPhotoModalOpen] = useState(false);
+  const [photoPreviewOpen, setPhotoPreviewOpen] = useState(false);
   const [photoFile, setPhotoFile] = useState(null);
   const navigate = useNavigate();
 
@@ -35,7 +37,8 @@ export default function Account({ token }) {
     if (!token) return;
     try {
       const { data } = await axios.get(
-        "http://localhost:5000/api/user/profile",
+        // "http://localhost:5000/api/user/profile",
+        "https://timebank-backend-67l5.onrender.com/api/user/profile",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -92,14 +95,16 @@ export default function Account({ token }) {
       };
 
       const { data } = await axios.put(
-        "http://localhost:5000/api/user/profile",
+        // "http://localhost:5000/api/user/profile",
+        "https://timebank-backend-67l5.onrender.com/api/user/profile",
+        
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       setUser(data.data);
       showCustomToast("success", "Profile updated successfully");
-      navigate('/profile');
+      navigate("/profile");
     } catch (err) {
       console.error("Update error:", err);
       showCustomToast("error", "Failed to update profile", err);
@@ -116,7 +121,8 @@ export default function Account({ token }) {
     setLoading(true);
     try {
       const { data } = await axios.put(
-        "http://localhost:5000/api/user/profile/photo",
+        // "http://localhost:5000/api/user/profile/photo",
+        "https://timebank-backend-67l5.onrender.com/api/user/profile/photo",
         photoData,
         {
           headers: {
@@ -163,10 +169,12 @@ export default function Account({ token }) {
         {/* Profile Photo */}
         <div className="flex items-center justify-center mb-6 relative">
           <img
+            onClick={() => setPhotoPreviewOpen(true)}
             src={user.profilePhoto || defaultAvatar}
             alt="Profile"
             className="h-[10rem] w-[10rem] rounded-full border-3 border-blue-600 p-0.5 object-cover"
           />
+          {/* edit icon */}
           <div
             onClick={() => setPhotoModalOpen(true)}
             className="bg-blue-300 rounded-full p-3 absolute bottom-0 ml-22"
@@ -303,20 +311,20 @@ export default function Account({ token }) {
           <button
             onClick={() => navigate("/profile")}
             className="flex gap-2 px-6 py-3 bg-gray-500 text-white font-semibold rounded-xl hover:bg-gray-700 transition"
-          > 
-            <RiArrowGoBackLine className="mt-1"/> Cancel
+          >
+            <RiArrowGoBackLine className="mt-1" /> Cancel
           </button>
           <button
-        onClick={handleUpdate}
-        disabled={loading}
-        className={`px-6 py-3 rounded-xl font-semibold text-white transition ${
-          loading
-            ? "bg-blue-300 cursor-not-allowed"
-            : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-        }`}
-      >
-        {loading ? "Saving..." : "Update Profile"}
-      </button>
+            onClick={handleUpdate}
+            disabled={loading}
+            className={`px-6 py-3 rounded-xl font-semibold text-white transition ${
+              loading
+                ? "bg-blue-300 cursor-not-allowed"
+                : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+            }`}
+          >
+            {loading ? "Saving..." : "Update Profile"}
+          </button>
         </div>
       </div>
 
@@ -352,6 +360,24 @@ export default function Account({ token }) {
               </button>
             </div>
           </Dialog.Panel>
+        </div>
+      </Dialog>
+
+      {/* Modal for profile photo photoPreviewOpen */}
+      <Dialog
+        open={photoPreviewOpen}
+        onClose={() => setPhotoPreviewOpen(false)}
+        className="fixed z-50 backdrop-blur-50 bg-black/85 inset-0 h-screen"
+      >
+        <div className="flex h-screen w-screen items-center justify-center">
+          <h1 className="fixed top-10 text-2xl font-bold text-gray-300">Profile Photo</h1>
+          <img src={user.profilePhoto} alt="" className="h-80 w-auto" />
+          <button
+            onClick={() => setPhotoPreviewOpen(false)}
+            className="flex text-3xl rounded-full px-2 py-2 text-gray-300 hover:bg-gray-400 transition justify-center absolute top-5 right-8"
+          >
+            <RxCross2/>
+          </button>
         </div>
       </Dialog>
     </div>
