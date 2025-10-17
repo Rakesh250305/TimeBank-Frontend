@@ -7,7 +7,10 @@ export default function Transactions({ token }) {
 
   const fetchTransactions = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/transactions", {
+      const res = await axios.get(
+        // "http://localhost:5000/api/transactions",
+        "https://timebank-backend-67l5.onrender.com/api/transactions", 
+        {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTransactions(res.data);

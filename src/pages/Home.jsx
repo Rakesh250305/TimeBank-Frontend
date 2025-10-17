@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import bg1 from "../assets/bg1.jpg";
-import Footer from "./Footer";
+import Footer from "../components/Footer";
 import { FaLaptopCode, FaHandsHelping } from "react-icons/fa";
 import { MdCurrencyExchange } from "react-icons/md";
 
@@ -17,7 +17,7 @@ export default function Home() {
             </a>
           </li>
           <li>
-            <a href="#about" className="hover:text-blue-600 hover:underline">
+            <a href="/about" className="hover:text-blue-600 hover:underline">
               About
             </a>
           </li>
@@ -28,14 +28,14 @@ export default function Home() {
           </li>
           <li>
             <a
-              href="#community"
+              href="/community"
               className="hover:text-blue-600 hover:underline"
             >
               Community
             </a>
           </li>
           <li>
-            <a href="#contact" className="hover:text-blue-600 hover:underline">
+            <a href="/contact" className="hover:text-blue-600 hover:underline">
               Contact
             </a>
           </li>

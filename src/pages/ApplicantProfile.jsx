@@ -16,7 +16,10 @@ const reviewsPerPage = 3;
 
   const fetchProfile = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/user/${id}`, {
+      const res = await axios.get(
+        // `http://localhost:5000/api/user/${id}`, 
+        `https://timebank-backend-67l5.onrender.com/api/user/${id}`, 
+        {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProfile(res.data);

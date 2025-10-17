@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { showCustomToast } from "../utils/toast";
-const API_URL = "http://localhost:5000/api/services";
+// const API_URL = "http://localhost:5000/api/services";
+const API_URL = "https://timebank-backend-67l5.onrender.com/api/services";
 
 export default function Services({ token }) {
   const [services, setServices] = useState([]);
@@ -16,7 +17,10 @@ export default function Services({ token }) {
   // Fetch logged-in user profile
   const fetchProfile = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/user/profile", {
+      const res = await axios.get(
+        // "http://localhost:5000/api/user/profile", 
+        "https://timebank-backend-67l5.onrender.com/api/user/profile", 
+        {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUserId(res.data._id);

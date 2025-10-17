@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:5000/api",
+  // baseURL: "http://localhost:5000/api",
+  baseURL: "https://timebank-backend-67l5.onrender.com/api" // backend deployed url
 });
 
 export const signup = (data) => API.post("/auth/signup", data);

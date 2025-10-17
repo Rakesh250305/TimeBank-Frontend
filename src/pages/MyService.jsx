@@ -15,7 +15,8 @@ import { MdTitle } from "react-icons/md";
 import { RiArrowGoBackLine } from "react-icons/ri";
 import { IoMdSend } from "react-icons/io";
 
-const API_URL = "http://localhost:5000/api/services";
+// const API_URL = "http://localhost:5000/api/services";
+const API_URL = "https://timebank-backend-67l5.onrender.com/api/services";
 
 export default function MyServices({ token }) {
   const navigate = useNavigate();
@@ -75,7 +76,10 @@ export default function MyServices({ token }) {
       );
       closeModal();
       fetchMyServices();
-      await axios.get("http://localhost:5000/api/user/profile", {
+      await axios.get(
+        // "http://localhost:5000/api/user/profile", 
+        "https://timebank-backend-67l5.onrender.com/api/user/profile", 
+        {
         headers: { Authorization: `Bearer ${token}` },
       });
       showCustomToast("success", "Conifrmed Completion","The Applicant is Confirmed for completion of the Service");
