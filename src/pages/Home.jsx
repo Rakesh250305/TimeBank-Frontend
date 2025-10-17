@@ -17,7 +17,9 @@ export default function Home() {
             </a>
           </li>
           <li>
-            <Link href="/about" className="hover:text-blue-600 hover:underline">
+            <Link 
+            to="/about" 
+            className="hover:text-blue-600 hover:underline">
               About
             </Link>
           </li>
@@ -28,14 +30,16 @@ export default function Home() {
           </li>
           <li>
             <Link
-              href="/community"
+              to="/community"
               className="hover:text-blue-600 hover:underline"
             >
               Community
             </Link>
           </li>
           <li>
-            <Link href="/contact" className="hover:text-blue-600 hover:underline">
+            <Link 
+              to="/contact" 
+              className="hover:text-blue-600 hover:underline">
               Contact
             </Link>
           </li>
