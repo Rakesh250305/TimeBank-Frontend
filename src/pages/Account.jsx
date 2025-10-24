@@ -97,7 +97,7 @@ export default function Account({ token }) {
       const { data } = await axios.put(
         // "http://localhost:5000/api/user/profile",
         "https://timebank-backend-67l5.onrender.com/api/user/profile",
-        
+
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -151,9 +151,27 @@ export default function Account({ token }) {
 
   if (!user)
     return (
-      <p className="text-center mt-24 text-lg text-gray-700">
-        Loading profile...
-      </p>
+      <div className="fixed inset-0 flex items-center justify-center bg-gray-900 z-50">
+        <div className="flex flex-col items-center">
+          <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24 mb-4"></div>
+          <p className="text-white text-lg">Loading, please wait...</p>
+        </div>
+
+        <style jsx>{`
+          .loader {
+            border-top-color: #3b82f6;
+            animation: spin 1s linear infinite;
+          }
+          @keyframes spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(360deg);
+            }
+          }
+        `}</style>
+      </div>
     );
 
   return (
@@ -370,13 +388,15 @@ export default function Account({ token }) {
         className="fixed z-50 backdrop-blur-50 bg-black/85 inset-0 h-screen"
       >
         <div className="flex h-screen w-screen items-center justify-center">
-          <h1 className="fixed top-10 text-2xl font-bold text-gray-300">Profile Photo</h1>
+          <h1 className="fixed top-10 text-2xl font-bold text-gray-300">
+            Profile Photo
+          </h1>
           <img src={user.profilePhoto} alt="" className="h-80 w-auto" />
           <button
             onClick={() => setPhotoPreviewOpen(false)}
             className="flex text-3xl rounded-full px-2 py-2 text-gray-300 hover:bg-gray-400 transition justify-center absolute top-5 right-8"
           >
-            <RxCross2/>
+            <RxCross2 />
           </button>
         </div>
       </Dialog>

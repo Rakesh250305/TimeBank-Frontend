@@ -7,7 +7,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 // const socket = io("http://localhost:5000");
-const socket = io("https://timebank-backend-67l5.onrender.com")
+const socket = io("https://timebank-backend-67l5.onrender.com");
 
 export default function Profile({ token }) {
   const [user, setUser] = useState(null);
@@ -22,11 +22,12 @@ export default function Profile({ token }) {
   const fetchProfile = async () => {
     try {
       const res = await axios.get(
-        // "http://localhost:5000/api/user/profile", 
-        "https://timebank-backend-67l5.onrender.com/api/user/profile", 
+        // "http://localhost:5000/api/user/profile",
+        "https://timebank-backend-67l5.onrender.com/api/user/profile",
         {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       const userData = {
         ...res.data.data,
         profilePhoto: res.data.data.profilePhoto
@@ -150,7 +151,30 @@ export default function Profile({ token }) {
     };
   }, [user?._id]);
 
-  if (!user) return <p className="text-center mt-24 text-lg">Loading...</p>;
+  if (!user)
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-gray-900 z-50">
+        <div className="flex flex-col items-center">
+          <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24 mb-4"></div>
+          <p className="text-white text-lg">Loading, please wait...</p>
+        </div>
+
+        <style jsx>{`
+          .loader {
+            border-top-color: #3b82f6;
+            animation: spin 1s linear infinite;
+          }
+          @keyframes spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(360deg);
+            }
+          }
+        `}</style>
+      </div>
+    );
 
   return (
     <div className="flex flex-col min-h-screen font-sans">
