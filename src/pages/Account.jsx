@@ -101,7 +101,6 @@ export default function Account({ token }) {
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
       setUser(data.data);
       showCustomToast("success", "Profile updated successfully");
       navigate("/profile");

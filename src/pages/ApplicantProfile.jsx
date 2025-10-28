@@ -11,17 +11,17 @@ export default function ApplicantProfile({ token }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-const reviewsPerPage = 3;
-
+  const reviewsPerPage = 3;
 
   const fetchProfile = async () => {
     try {
       const res = await axios.get(
-        // `http://localhost:5000/api/user/${id}`, 
-        `https://timebank-backend-67l5.onrender.com/api/user/${id}`, 
+        // `http://localhost:5000/api/user/${id}`,
+        `https://timebank-backend-67l5.onrender.com/api/user/${id}`,
         {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setProfile(res.data);
       // console.log(res.data);
     } catch (err) {
@@ -36,7 +36,29 @@ const reviewsPerPage = 3;
   }, [id]);
 
   if (loading)
-    return <div className="p-10 text-center text-gray-600">Loading...</div>;
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-gray-900 z-50">
+        <div className="flex flex-col items-center">
+          <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24 mb-4"></div>
+          <p className="text-white text-lg">Loading, please wait...</p>
+        </div>
+
+        <style jsx>{`
+          .loader {
+            border-top-color: #3b82f6;
+            animation: spin 1s linear infinite;
+          }
+          @keyframes spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(360deg);
+            }
+          }
+        `}</style>
+      </div>
+    );
   if (!profile)
     return <div className="p-10 text-center text-red-600">User not found.</div>;
 
@@ -57,10 +79,7 @@ const reviewsPerPage = 3;
   } = profile;
 
   const trimmedPhone = phone?.slice(0, 4);
-  // const trimmedEmailStart = email?.slice(0, 4);
-  // const trimmedEmailEnd = email?.slice(email.length-6, email.length);
 
-  // console.log(reviews.rating); //shows undefined
   const StarRating = ({ rating }) => {
     const filledStars = Array.from({ length: rating }, (_, i) => (
       <FaStar key={`filled-${i}`} className="text-yellow-400 inline-block" />
@@ -75,16 +94,15 @@ const reviewsPerPage = 3;
     );
   };
   // Sort reviews by newest first
-const sortedReviews = [...(reviews || [])].sort(
-  (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-);
+  const sortedReviews = [...(reviews || [])].sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  );
 
-// Pagination logic
-const totalPages = Math.ceil(sortedReviews.length / reviewsPerPage);
-const startIndex = (currentPage - 1) * reviewsPerPage;
-const endIndex = startIndex + reviewsPerPage;
-const paginatedReviews = sortedReviews.slice(startIndex, endIndex);
-
+  // Pagination logic
+  const totalPages = Math.ceil(sortedReviews.length / reviewsPerPage);
+  const startIndex = (currentPage - 1) * reviewsPerPage;
+  const endIndex = startIndex + reviewsPerPage;
+  const paginatedReviews = sortedReviews.slice(startIndex, endIndex);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -154,7 +172,10 @@ const paginatedReviews = sortedReviews.slice(startIndex, endIndex);
               <ul className="space-y-2">
                 {experiences.map((exp, index) => (
                   <li key={index} className="bg-gray-100 p-3 rounded">
-                    <h1 className="text-lg font-semibold">{index + 1}. {exp.title} || {exp.role}{" "} || {exp.years} Years</h1>               
+                    <h1 className="text-lg font-semibold">
+                      {index + 1}. {exp.title} || {exp.role} || {exp.years}{" "}
+                      Years
+                    </h1>
                     <p className="text-gray-500 ml-4">{exp.description}</p>
                   </li>
                 ))}
@@ -171,8 +192,12 @@ const paginatedReviews = sortedReviews.slice(startIndex, endIndex);
               <ul className="space-y-2">
                 {academics.map((edu, index) => (
                   <li key={index} className="bg-gray-100 p-3 rounded">
-                    <h1 className="text-lg font-semibold">{index + 1}. {edu.title} || {edu.year}{" "}</h1>
-                    <p className="text-gray-500 ml-4">{edu.university} | {edu.percentage} (Percent / CGPA)</p>
+                    <h1 className="text-lg font-semibold">
+                      {index + 1}. {edu.title} || {edu.year}{" "}
+                    </h1>
+                    <p className="text-gray-500 ml-4">
+                      {edu.university} | {edu.percentage} (Percent / CGPA)
+                    </p>
                   </li>
                 ))}
               </ul>
@@ -181,48 +206,58 @@ const paginatedReviews = sortedReviews.slice(startIndex, endIndex);
 
           {/* Reviews */}
           {reviews?.length > 0 && (
-  <div className="mt-6 overflow-hidden">
-    <h3 className="text-xl font-semibold text-blue-500 mb-4">Reviews</h3>
+            <div className="mt-6 overflow-hidden">
+              <h3 className="text-xl font-semibold text-blue-500 mb-4">
+                Reviews
+              </h3>
 
-    <ul className="space-y-2">
-      {paginatedReviews.map((rew, index) => (
-        <li key={index} className="bg-gray-100 px-5 py-3 rounded list-none">
-          <p className="text-gray-700 flex items-center text-sm gap-2">
-            Rating: <StarRating rating={rew.rating} />
-          </p>
-          <p className="text-sm text-gray-700">Review: {rew.comment}</p>
-          <p className="text-xs text-gray-500">
-            Date: {new Date(rew.createdAt).toLocaleDateString()}
-          </p>
-        </li>
-      ))}
-    </ul>
+              <ul className="space-y-2">
+                {paginatedReviews.map((rew, index) => (
+                  <li
+                    key={index}
+                    className="bg-gray-100 px-5 py-3 rounded list-none"
+                  >
+                    <p className="text-gray-700 flex items-center text-sm gap-2">
+                      Rating: <StarRating rating={rew.rating} />
+                    </p>
+                    <p className="text-sm text-gray-700">
+                      Review: {rew.comment}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Date: {new Date(rew.createdAt).toLocaleDateString()}
+                    </p>
+                  </li>
+                ))}
+              </ul>
 
-    {/* Pagination Controls */}
-    <div className="flex justify-center items-center gap-4 mt-4">
-      <button
-        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-        disabled={currentPage === 1}
-        className="px-3 py-1 bg-blue-500 rounded hover:bg-blue-700 text-white disabled:opacity-50"
-      >
-        Previous
-      </button>
+              {/* Pagination Controls */}
+              <div className="flex justify-center items-center gap-4 mt-4">
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                  }
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 bg-blue-500 rounded hover:bg-blue-700 text-white disabled:opacity-50"
+                >
+                  Previous
+                </button>
 
-      <span className="text-sm text-gray-700">
-        Page {currentPage} of {totalPages}
-      </span>
+                <span className="text-sm text-gray-700">
+                  Page {currentPage} of {totalPages}
+                </span>
 
-      <button
-        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-        disabled={currentPage === totalPages}
-        className="px-3 py-1 bg-blue-500 rounded hover:bg-blue-700 text-white disabled:opacity-50"
-      >
-        Next
-      </button>
-    </div>
-  </div>
-)}
-
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                  }
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1 bg-blue-500 rounded hover:bg-blue-700 text-white disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
