@@ -77,8 +77,8 @@ export default function ApplicantProfile({ token }) {
     profilePhoto,
     reviews,
   } = profile;
-
-  const trimmedPhone = phone?.slice(0, 4);
+  
+  const trimmedPhone = phone ? phone.toString().slice(0, 4) : "";
 
   const StarRating = ({ rating }) => {
     const filledStars = Array.from({ length: rating }, (_, i) => (
