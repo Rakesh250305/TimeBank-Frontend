@@ -2,13 +2,10 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { showCustomToast } from "../utils/toast"; 
+import { showCustomToast } from "../utils/toast";
 
 // const API_URL = "http://localhost:5000/api/services";
 const API_URL = "https://timebank-backend-67l5.onrender.com/api/services";
-
-
-
 
 export default function AppliedServices({ token, userId }) {
   const [services, setServices] = useState([]);
@@ -37,7 +34,11 @@ export default function AppliedServices({ token, userId }) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchApplied();
-      showCustomToast("success", "Completion request sent", "Request for completion is sent seccessfully")
+      showCustomToast(
+        "success",
+        "Completion request sent",
+        "Request for completion is sent seccessfully"
+      );
     } catch (err) {
       console.error("Error requesting completion:", err);
       showCustomToast("error", "Error requesting completion", err);
@@ -100,7 +101,7 @@ export default function AppliedServices({ token, userId }) {
 
                 {/* 🔹 Status Badge */}
                 <div
-                  className={`py-2 px-4 text-lg border-2 rounded-lg capitalize font-semibold absolute right-5 top-5
+                  className={`py-1 md:py-2 px-2 md:px-4 text-sm md:text-lg border-2 rounded-lg capitalize font-semibold absolute right-5 top-5
                     ${
                       s.status === "requested"
                         ? "bg-red-100 text-gray-700 border-gray-400"
@@ -113,7 +114,15 @@ export default function AppliedServices({ token, userId }) {
                         : "bg-red-100 text-red-500 border-red-500"
                     }`}
                 >
-                  {s.status}
+                  {s.status === "open"
+                    ? "Requested"
+                    : s.status === "processing"
+                    ? "Processing"
+                    : s.status === "completion_requested"
+                    ? "Completion Requested"
+                    : s.status === "completed"
+                    ? "Completed"
+                    : s.status}
                 </div>
 
                 {s.approvalMessage && (
@@ -122,22 +131,51 @@ export default function AppliedServices({ token, userId }) {
                   </p>
                 )}
 
+                <div
+                  className={`mt-2 py-2 px-1 md:text-lg rounded-lg capitalize font-semibold
+                    ${
+                      s.status === "requested"
+                        ? "bg-red-100 text-gray-700 border-gray-400"
+                        : s.status === "processing"
+                        ? "bg-yellow-100 text-yellow-700 border-yellow-500"
+                        : s.status === "completion_requested"
+                        ? "bg-fuchsia-100 text-fuchsia-700 border-fuchsia-500"
+                        : s.status === "completed"
+                        ? "bg-blue-100 text-blue-700 border-blue-500"
+                        : "bg-red-100 text-red-500 border-red-500"
+                    }`}
+                >
+                  {s.status === "open"
+                    ? "⏳ Waiting for Owner’s Approval"
+                    : s.status === "requested"
+                    ? "⏳ Waiting for Owner’s Approval"
+                    : s.status === "processing"
+                    ? "🟡 Approved – In Progress"
+                    : s.status === "completion_requested"
+                    ? "🟣 Completion Requested"
+                    : s.status === "completed"
+                    ? "💙 Completed"
+                    : s.status}
+                </div>
+
                 {/* 🔹 Buttons / Status handling */}
                 <div className="flex gap-2 mt-2">
-                  {s.status === "requested" && s.requestedBy?._id === userId && (
-                    <span className="text-yellow-600 font-semibold">
-                      ⏳ Waiting for owner approval
-                    </span>
-                  )}
+                  {(s.status === "requested" || s.status === "open") &&
+                    s.applicants?.some((a) => a.user === userId) && (
+                      <span className="text-yellow-600 font-semibold">
+                        ⏳ Waiting for owner’s approval
+                      </span>
+                    )}
 
-                  {s.status === "processing" && s.requestedBy?._id === userId && (
-                    <button
-                      onClick={() => handleCompleteRequest(s._id)}
-                      className="bg-purple-500 text-white px-3 py-1 w-full rounded hover:bg-purple-900"
-                    >
-                      Mark Complete
-                    </button>
-                  )}
+                  {s.status === "processing" &&
+                    s.requestedBy?._id === userId && (
+                      <button
+                        onClick={() => handleCompleteRequest(s._id)}
+                        className="bg-purple-500 text-white px-3 py-1 w-full rounded hover:bg-purple-900"
+                      >
+                        Mark Complete
+                      </button>
+                    )}
 
                   {s.status === "completion_requested" &&
                     s.requestedBy?._id === userId && (

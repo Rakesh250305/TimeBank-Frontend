@@ -159,20 +159,22 @@ export default function Profile({ token }) {
           <p className="text-white text-lg">Loading, please wait...</p>
         </div>
 
-        <style jsx>{`
-          .loader {
-            border-top-color: #3b82f6;
-            animation: spin 1s linear infinite;
-          }
-          @keyframes spin {
-            0% {
-              transform: rotate(0deg);
+        <style jsx>
+          {`
+            .loader {
+              border-top-color: #3b82f6;
+              animation: spin 1s linear infinite;
             }
-            100% {
-              transform: rotate(360deg);
+            @keyframes spin {
+              0% {
+                transform: rotate(0deg);
+              }
+              100% {
+                transform: rotate(360deg);
+              }
             }
-          }
-        `}</style>
+          `}
+        </style>
       </div>
     );
 
