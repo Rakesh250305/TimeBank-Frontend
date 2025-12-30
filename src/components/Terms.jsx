@@ -1,4 +1,3 @@
-import React from "react";
 import Footer from "./Footer";
 import { FaBalanceScale, FaGavel } from "react-icons/fa";
 
@@ -89,10 +88,7 @@ export default function Terms() {
           </h2>
           <p>For legal inquiries: <span className="text-indigo-700 font-semibold">legal@timebank.com</span></p>
         </section>
-
-        
       </main>
-
       <Footer />
     </div>
   );

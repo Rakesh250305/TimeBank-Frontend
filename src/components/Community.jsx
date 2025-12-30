@@ -68,66 +68,6 @@ export default function Community() {
             ))}
           </div>
         </section>
-{/* 
-        <section className="py-20 bg-gray-50">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-blue-600">
-              Community Spotlight
-            </h2>
-            <p className="text-gray-600 max-w-xl mx-auto mt-2">
-              Recognizing our top contributors who make learning and helping a
-              daily habit.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-10 max-w-6xl mx-auto px-6">
-            {[
-              {
-                name: "Riya Sharma",
-                role: "Frontend Mentor",
-                img: "https://i.pravatar.cc/200?img=47",
-                hours: "48+",
-                review: "Helping students build beautiful UIs and React apps.",
-              },
-              {
-                name: "Aditya Rao",
-                role: "Data Science Coach",
-                img: "https://i.pravatar.cc/200?img=30",
-                hours: "72+",
-                review: "Guiding learners in ML, Python & real-world projects.",
-              },
-              {
-                name: "Sanjana Gupta",
-                role: "Soft Skills Trainer",
-                img: "https://i.pravatar.cc/200?img=35",
-                hours: "55+",
-                review:
-                  "Empowering people with communication and leadership skills.",
-              },
-            ].map((m, i) => (
-              <div
-                key={i}
-                className="bg-white p-8 rounded-2xl text-center shadow-md hover:shadow-xl transition hover:-translate-y-2"
-              >
-                <img
-                  className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-blue-200 object-cover"
-                  src={m.img}
-                  alt={m.name}
-                />
-                <h4 className="font-semibold text-lg text-gray-900">
-                  {m.name}
-                </h4>
-                <p className="text-blue-600 text-sm mb-1">{m.role}</p>
-                <span className="text-gray-600 text-sm">
-                  {m.hours} Hours Shared
-                </span>
-                <p className="text-gray-500 italic text-sm mt-3">
-                  “{m.review}”
-                </p>
-              </div>
-            ))}
-          </div>
-        </section> */}
 
         <div className="text-center mt-10">
           <Link

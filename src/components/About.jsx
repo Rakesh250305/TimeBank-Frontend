@@ -165,62 +165,78 @@ export default function About() {
               Meet Our Team
             </h2>
 
-<div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-20">
-  {[
-    {
-      name: "Rakesh Raikwar",
-      role: "Founder & Full-Stack Developer",
-      img: "https://i.pravatar.cc/200?img=12",
-      linkedin: "#",
-      github: "#",
-      twitter: "#",
-    },
-    // {
-    //   name: "Priya Sharma",
-    //   role: "UI/UX Designer",
-    //   img: "https://i.pravatar.cc/200?img=47",
-    //   linkedin: "#",
-    //   github: "#",
-    //   twitter: "#",
-    // },
-    // {
-    //   name: "Amit Verma",
-    //   role: "Backend Engineer",
-    //   img: "https://i.pravatar.cc/200?img=8",
-    //   linkedin: "#",
-    //   github: "#",
-    //   twitter: "#",
-    // },
-    // {
-    //   name: "Sara Khan",
-    //   role: "Community Manager",
-    //   img: "https://i.pravatar.cc/200?img=23",
-    //   linkedin: "#",
-    //   github: "#",
-    //   twitter: "#",
-    // },
-  ].map((member, i) => (
-    <div
-      key={i}
-      className="bg-white w-[75rem] rounded-2xl p-6 shadow-md hover:shadow-xl hover:-translate-y-2 border border-gray-100 transition group text-center"
-    >
-      <img
-        src={member.img}
-        alt={member.name}
-        className="w-28 h-28 rounded-full mx-auto mb-4 object-cover border-4 border-blue-200 group-hover:border-blue-500 transition"
-      />
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-20">
+              {[
+                {
+                  name: "Rakesh Raikwar",
+                  role: "Founder & Full-Stack Developer",
+                  img: "https://i.pravatar.cc/200?img=12",
+                  linkedin: "#",
+                  github: "#",
+                  twitter: "#",
+                },
+                // {
+                //   name: "Priya Sharma",
+                //   role: "UI/UX Designer",
+                //   img: "https://i.pravatar.cc/200?img=47",
+                //   linkedin: "#",
+                //   github: "#",
+                //   twitter: "#",
+                // },
+                // {
+                //   name: "Amit Verma",
+                //   role: "Backend Engineer",
+                //   img: "https://i.pravatar.cc/200?img=8",
+                //   linkedin: "#",
+                //   github: "#",
+                //   twitter: "#",
+                // },
+                // {
+                //   name: "Sara Khan",
+                //   role: "Community Manager",
+                //   img: "https://i.pravatar.cc/200?img=23",
+                //   linkedin: "#",
+                //   github: "#",
+                //   twitter: "#",
+                // },
+              ].map((member, i) => (
+                <div
+                  key={i}
+                  className="bg-white w-[75rem] rounded-2xl p-6 shadow-md hover:shadow-xl hover:-translate-y-2 border border-gray-100 transition group text-center"
+                >
+                  <img
+                    src={member.img}
+                    alt={member.name}
+                    className="w-28 h-28 rounded-full mx-auto mb-4 object-cover border-4 border-blue-200 group-hover:border-blue-500 transition"
+                  />
 
-      <h3 className="text-lg font-bold text-gray-800">{member.name}</h3>
-      <p className="text-gray-500 text-sm mb-5">{member.role}</p>
-      <div className="flex justify-center gap-4 text-xl text-blue-600">
-        <a href={member.linkedin} className="hover:text-blue-800 transition"><FaLinkedin /></a>
-        <a href={member.github} className="hover:text-gray-800 transition"><FaGithub /></a>
-        <a href={member.twitter} className="hover:text-blue-400 transition"><FaTwitter /></a>
-      </div>
-    </div>
-  ))}
-</div>
-
+                  <h3 className="text-lg font-bold text-gray-800">
+                    {member.name}
+                  </h3>
+                  <p className="text-gray-500 text-sm mb-5">{member.role}</p>
+                  <div className="flex justify-center gap-4 text-xl text-blue-600">
+                    <a
+                      href={member.linkedin}
+                      className="hover:text-blue-800 transition"
+                    >
+                      <FaLinkedin />
+                    </a>
+                    <a
+                      href={member.github}
+                      className="hover:text-gray-800 transition"
+                    >
+                      <FaGithub />
+                    </a>
+                    <a
+                      href={member.twitter}
+                      className="hover:text-blue-400 transition"
+                    >
+                      <FaTwitter />
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
 
             {/* How We Work */}
             <h3 className="text-2xl font-bold text-center text-gray-800  mb-10">
@@ -228,29 +244,47 @@ export default function About() {
             </h3>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-  {[
-    { icon: "📌", title: "Community Driven", desc: "Members help & learn together" },
-    { icon: "⏳", title: "Time-Credit System", desc: "Earn 1 credit per hour shared" },
-    { icon: "🎓", title: "Skill Exchange", desc: "Learn anything from anyone" },
-    { icon: "🌍", title: "Inclusive Culture", desc: "Anyone can join & contribute" },
-    { icon: "🤝", title: "Trust-Based", desc: "Fair & respectful interactions" },
-  ].map((item, i) => (
-    <div
-      key={i}
-      className="bg-white p-6 rounded-xl shadow hover:shadow-lg border border-gray-100 transition text-center hover:-translate-y-1"
-    >
-      <div className="text-4xl mb-2">{item.icon}</div>
-      <h4 className="font-semibold text-blue-600">{item.title}</h4>
-      <p className="text-gray-600 text-sm mt-1">{item.desc}</p>
-    </div>
-  ))}
-</div>
-
+              {[
+                {
+                  icon: "📌",
+                  title: "Community Driven",
+                  desc: "Members help & learn together",
+                },
+                {
+                  icon: "⏳",
+                  title: "Time-Credit System",
+                  desc: "Earn 1 credit per hour shared",
+                },
+                {
+                  icon: "🎓",
+                  title: "Skill Exchange",
+                  desc: "Learn anything from anyone",
+                },
+                {
+                  icon: "🌍",
+                  title: "Inclusive Culture",
+                  desc: "Anyone can join & contribute",
+                },
+                {
+                  icon: "🤝",
+                  title: "Trust-Based",
+                  desc: "Fair & respectful interactions",
+                },
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  className="bg-white p-6 rounded-xl shadow hover:shadow-lg border border-gray-100 transition text-center hover:-translate-y-1"
+                >
+                  <div className="text-4xl mb-2">{item.icon}</div>
+                  <h4 className="font-semibold text-blue-600">{item.title}</h4>
+                  <p className="text-gray-600 text-sm mt-1">{item.desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
       </main>
-      
-      
+
       <CtaSection />
 
       <Footer />
