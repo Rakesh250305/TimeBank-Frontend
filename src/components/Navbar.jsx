@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import io from "socket.io-client";
-// const socket = io("https://timebank-backend-67l5.onrender.com")
+// const socket = io("http://localhost:5000");
+const socket = io("https://timebank-backend-67l5.onrender.com")
 
 export default function Navbar({ token }) {
   const [unreadCount, setUnreadCount] = useState(0);
@@ -13,7 +14,8 @@ export default function Navbar({ token }) {
     if (!token) return;
     try {
       const res = await axios.get(
-        // "https://timebank-backend-67l5.onrender.com/api/notifications/unread/count",
+        // "http://localhost:5000/api/notifications/unread/count",
+        "https://timebank-backend-67l5.onrender.com/api/notifications/unread/count",
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setUnreadCount(res.data.count);
@@ -26,7 +28,8 @@ export default function Navbar({ token }) {
     if (!token) return;
     try {
       const res = await axios.get(
-        // "https://timebank-backend-67l5.onrender.com/api/user/profile",
+        // "http://localhost:5000/api/user/profile",
+        "https://timebank-backend-67l5.onrender.com/api/user/profile",
         {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -40,6 +43,7 @@ export default function Navbar({ token }) {
     try {
       return JSON.parse(atob(token.split(".")[1]));
     } catch (e) {
+      console.error(e);
       return null;
     }
   }

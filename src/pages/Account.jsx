@@ -37,6 +37,7 @@ export default function Account({ token }) {
     if (!token) return;
     try {
       const { data } = await axios.get(
+        // "http://localhost:5000/api/user/profile",
         "https://timebank-backend-67l5.onrender.com/api/user/profile",
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -94,6 +95,7 @@ export default function Account({ token }) {
       };
 
       const { data } = await axios.put(
+        // "http://localhost:5000/api/user/profile",
         "https://timebank-backend-67l5.onrender.com/api/user/profile",
 
         payload,
@@ -118,6 +120,7 @@ export default function Account({ token }) {
     setLoading(true);
     try {
       const { data } = await axios.put(
+        // "http://localhost:5000/api/user/profile/photo",
         "https://timebank-backend-67l5.onrender.com/api/user/profile/photo",
         photoData,
         {

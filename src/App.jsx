@@ -1,6 +1,6 @@
 import "./App.css";
 import { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -22,6 +22,17 @@ import Privacy from "./components/Privacy";
 import Terms from "./components/Terms";
 import Community from "./components/Community";
 import ApplicantProfile from "./pages/ApplicantProfile";
+import DeleteAccount from "./components/DeleteAccount";
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+
+  return null
+}
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
@@ -42,6 +53,7 @@ function App() {
   return (
     <>
       <BrowserRouter>
+      <ScrollToTop/>
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Home />} />
@@ -50,6 +62,7 @@ function App() {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/community" element={<Community />} />
+          <Route path="delete-account" element={<DeleteAccount/>}/>
           <Route path="/signup" element={<Signup setToken={setToken} />} />
           <Route path="/login" element={<Login setToken={setToken} />} />
 

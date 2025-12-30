@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <footer className="bg-gradient-to-r from-blue-500 to-indigo-600 text-gray-300 mt-auto py-6 overflow-hidden">
+    <footer className="bg-gradient-to-r from-blue-900 to-indigo-900 text-gray-300 mt-auto py-6 px-20 overflow-hidden">
       <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
         {/* Navigation Links */}
         <div className="flex flex-row gap-4 text-sm md:text-base">
