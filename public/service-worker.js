@@ -1,18 +1,33 @@
-const CACHE_NAME = "pwa-cache-v1";
-const urlsToCache = ["/", "/index.html"];
+const CACHE_NAME = "timebank-cache-v4";
 
 self.addEventListener("install", (event) => {
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(urlsToCache);
-    })
+    caches.keys().then((keys) =>
+      Promise.all(keys.map((key) => key !== CACHE_NAME && caches.delete(key)))
+    )
   );
+  self.clients.claim();
 });
 
 self.addEventListener("fetch", (event) => {
+  const { request } = event;
+
+  // ❌ DO NOT cache JS, CSS, or modules
+  if (
+    request.destination === "script" ||
+    request.destination === "style" ||
+    request.destination === "worker"
+  ) {
+    return;
+  }
+
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
+    caches.match(request).then((cached) => {
+      return cached || fetch(request);
     })
   );
 });
