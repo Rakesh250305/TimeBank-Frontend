@@ -23,6 +23,7 @@ import Terms from "./components/Terms";
 import Community from "./components/Community";
 import ApplicantProfile from "./pages/ApplicantProfile";
 import DeleteAccount from "./components/DeleteAccount";
+import InstallPWA from "./components/InstallPWA";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -208,9 +209,11 @@ function App() {
         draggable
         pauseOnHover
         theme="light"
-        closeButton={false} // hide close button for all toasts
-        toastStyle={{ background: "transparent", boxShadow: "none" }} // transparent bg globally
+        closeButton={false}
+        toastStyle={{ background: "transparent", boxShadow: "none" }}
       />
+      <InstallPWA/>
+      {/* button to install of PWA */}
     </>
   );
 }
