@@ -14,7 +14,7 @@ export default function InstallPWA() {
 
     window.addEventListener("appinstalled", () => {
       setIsInstalled(true);
-      console.log("✅ PWA Installed");
+    //   console.log("✅ PWA Installed");
     });
 
     return () => {
