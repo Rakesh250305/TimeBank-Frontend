@@ -24,6 +24,7 @@ import Community from "./components/Community";
 import ApplicantProfile from "./pages/ApplicantProfile";
 import DeleteAccount from "./components/DeleteAccount";
 import InstallPWA from "./components/InstallPWA";
+import ForgotPassword from "./pages/ForgotPassword";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -66,6 +67,7 @@ function App() {
           <Route path="delete-account" element={<DeleteAccount/>}/>
           <Route path="/signup" element={<Signup setToken={setToken} />} />
           <Route path="/login" element={<Login setToken={setToken} />} />
+          <Route path="/forgetPassword" element={<ForgotPassword/>} />
 
           {/* Protected routes */}
           <Route
