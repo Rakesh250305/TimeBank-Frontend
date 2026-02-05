@@ -7,7 +7,7 @@ import defaultavatar from "../assets/default-profile.webp";
 import { FaStar, FaRegStar } from "react-icons/fa";
 
 export default function ApplicantProfile({ token }) {
-   const apiUrl = import.meta.env.BACKEND_URL;
+   const apiUrl = import.meta.env.VITE_BACKEND_URL;
   const { id } = useParams();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);

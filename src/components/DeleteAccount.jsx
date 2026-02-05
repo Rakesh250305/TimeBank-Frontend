@@ -7,7 +7,7 @@ import {
 import { showCustomToast } from "../utils/toast";
 
 export default function DeleteAccount() {
-   const apiUrl = import.meta.env.BACKEND_URL;
+   const apiUrl = import.meta.env.VITE_BACKEND_URL;
   const [submitted, setSubmitted] = useState(false);
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");

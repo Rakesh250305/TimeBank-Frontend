@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Navbar from "../components/Navbar";
-const apiUrl = import.meta.env.BACKEND_URL;
+const apiUrl = import.meta.env.VITE_BACKEND_URL;
 
 
 export default function Transactions({ token }) {

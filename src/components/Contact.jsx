@@ -13,7 +13,7 @@ import CtaSection from "./CtaSection";
 import { showCustomToast } from "../utils/toast";
 
 export default function Contact() {
-   const apiUrl = import.meta.env.BACKEND_URL;
+   const apiUrl = import.meta.env.VITE_BACKEND_URL;
   const [form, setForm] = useState({ name: "", email: "", message: "" });
 
   const handleChange = (e) =>

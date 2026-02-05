@@ -8,7 +8,7 @@ import { showCustomToast } from "../utils/toast";
 import { RiArrowGoBackLine } from "react-icons/ri";
 import { RxCross2 } from "react-icons/rx";
 export default function Account({ token }) {
-   const apiUrl = import.meta.env.BACKEND_URL;
+   const apiUrl = import.meta.env.VITE_BACKEND_URL;
   const [user, setUser] = useState(null);
   const [formData, setFormData] = useState({
     firstName: "",

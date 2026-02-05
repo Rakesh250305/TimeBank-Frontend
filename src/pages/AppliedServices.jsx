@@ -5,7 +5,7 @@ import Footer from "../components/Footer";
 import { showCustomToast } from "../utils/toast";
 
 export default function AppliedServices({ token, userId }) {
-   const apiUrl = import.meta.env.BACKEND_URL;
+   const apiUrl = import.meta.env.VITE_BACKEND_URL;
   const [services, setServices] = useState([]);
 
   // 🔹 Pagination state

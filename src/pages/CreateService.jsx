@@ -10,7 +10,7 @@ import { IoMdSend } from "react-icons/io";
 import { RiArrowGoBackLine } from "react-icons/ri";
 
 export default function CreateService({ token }) {
-   const apiUrl = import.meta.env.BACKEND_URL;
+   const apiUrl = import.meta.env.VITE_BACKEND_URL;
   const [form, setForm] = useState({
     title: "",
     description: "",

@@ -4,7 +4,7 @@ import axios from "axios";
 import Footer from "../components/Footer";
 
 export default function EditService({ token }) {
-  const apiUrl = import.meta.env.BACKEND_URL;
+  const apiUrl = import.meta.env.VITE_BACKEND_URL;
   const { id } = useParams();
   const navigate = useNavigate();
   const [form, setForm] = useState({

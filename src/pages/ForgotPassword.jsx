@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import login_bg from "../assets/login_page_bg.png";
 import googleLogo from "../assets/Google_logo.png";
 import microsoftLogo from "../assets/Microsoft-logo.png";
-const apiUrl = import.meta.env.BACKEND_URL;
+const apiUrl = import.meta.env.VITE_BACKEND_URL;
 
 export default function ForgotPassword() {
       const navigate = useNavigate();
