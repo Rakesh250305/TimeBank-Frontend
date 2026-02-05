@@ -10,10 +10,8 @@ import { MdTitle } from "react-icons/md";
 import { RiArrowGoBackLine } from "react-icons/ri";
 import { IoMdSend } from "react-icons/io";
 
-// const API_URL = "http://localhost:5000/api/services";
-const API_URL = "https://timebank-backend-67l5.onrender.com/api/services";
-
 export default function MyServices({ token }) {
+   const apiUrl = import.meta.env.BACKEND_URL;
   const navigate = useNavigate();
   const [services, setServices] = useState([]);
   const [editingService, setEditingService] = useState(null);
@@ -37,7 +35,7 @@ export default function MyServices({ token }) {
 
   const fetchMyServices = async () => {
     try {
-      const res = await axios.get(`${API_URL}/my-services`, {
+      const res = await axios.get(`${apiUrl}/api/services/my-services`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setServices(res.data);
@@ -55,7 +53,7 @@ export default function MyServices({ token }) {
     } else if (action === "reject") {
       try {
         await axios.put(
-          `${API_URL}/${s._id}/reject-application`,
+          `${apiUrl}/api/services/${s._id}/reject-application`,
           { applicantId },
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -73,7 +71,7 @@ export default function MyServices({ token }) {
   const handleApprove = async () => {
     try {
       await axios.put(
-        `${API_URL}/${modalService._id}/approve`,
+        `${apiUrl}/api/services/${modalService._id}/approve`,
         { applicantId: modalService.applicantId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -93,7 +91,7 @@ export default function MyServices({ token }) {
   const handleConfirmCompletion = async () => {
     try {
       await axios.put(
-        `${API_URL}/${modalService._id}/confirm-completion`,
+        `${apiUrl}/api/serices/${modalService._id}/confirm-completion`,
         { message, rating },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -113,7 +111,7 @@ export default function MyServices({ token }) {
   const handleReject = async (serviceId) => {
     try {
       await axios.put(
-        `${API_URL}/reject-completion/${serviceId}`,
+        `${apiUrl}/api/services/reject-completion/${serviceId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -143,7 +141,7 @@ export default function MyServices({ token }) {
   const handleDeleteConfirm = async () => {
     if (!deleteModalService) return;
     try {
-      await axios.delete(`${API_URL}/${deleteModalService._id}`, {
+      await axios.delete(`${apiUrl}/api/services/${deleteModalService._id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setServices((prev) =>
@@ -174,7 +172,7 @@ export default function MyServices({ token }) {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.put(`${API_URL}/${editingService._id}`, form, {
+      const res = await axios.put(`${apiUrl}/api/services/${editingService._id}`, form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setServices((prev) =>

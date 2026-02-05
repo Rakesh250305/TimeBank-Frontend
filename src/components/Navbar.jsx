@@ -2,8 +2,9 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import io from "socket.io-client";
-// const socket = io("http://localhost:5000");
-const socket = io("https://timebank-backend-67l5.onrender.com")
+const apiUrl = import.meta.env.BACKEND_URL;
+
+const socket = io(`${apiUrl}`)
 
 export default function Navbar({ token }) {
   const [unreadCount, setUnreadCount] = useState(0);
@@ -14,8 +15,7 @@ export default function Navbar({ token }) {
     if (!token) return;
     try {
       const res = await axios.get(
-        // "http://localhost:5000/api/notifications/unread/count",
-        "https://timebank-backend-67l5.onrender.com/api/notifications/unread/count",
+        `${apiUrl}/api/notifications/unread/count`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setUnreadCount(res.data.count);
@@ -28,8 +28,7 @@ export default function Navbar({ token }) {
     if (!token) return;
     try {
       const res = await axios.get(
-        // "http://localhost:5000/api/user/profile",
-        "https://timebank-backend-67l5.onrender.com/api/user/profile",
+        `${apiUrl}/api/user/profile`,
         {
         headers: { Authorization: `Bearer ${token}` },
       });

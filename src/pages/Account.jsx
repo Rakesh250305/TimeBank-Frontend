@@ -8,6 +8,7 @@ import { showCustomToast } from "../utils/toast";
 import { RiArrowGoBackLine } from "react-icons/ri";
 import { RxCross2 } from "react-icons/rx";
 export default function Account({ token }) {
+   const apiUrl = import.meta.env.BACKEND_URL;
   const [user, setUser] = useState(null);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -37,8 +38,7 @@ export default function Account({ token }) {
     if (!token) return;
     try {
       const { data } = await axios.get(
-        // "http://localhost:5000/api/user/profile",
-        "https://timebank-backend-67l5.onrender.com/api/user/profile",
+        `${apiUrl}/api/user/profile`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -96,7 +96,7 @@ export default function Account({ token }) {
 
       const { data } = await axios.put(
         // "http://localhost:5000/api/user/profile",
-        "https://timebank-backend-67l5.onrender.com/api/user/profile",
+        `${apiUrl}/api/user/profile`,
 
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
@@ -120,8 +120,7 @@ export default function Account({ token }) {
     setLoading(true);
     try {
       const { data } = await axios.put(
-        // "http://localhost:5000/api/user/profile/photo",
-        "https://timebank-backend-67l5.onrender.com/api/user/profile/photo",
+        `${apiUrl}/api/user/profile/photo`,
         photoData,
         {
           headers: {

@@ -2,15 +2,15 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "../components/Navbar";
 
-// const API_URL = "http://localhost:5000/api/notifications";
-const API_URL = "https://timebank-backend-67l5.onrender.com/api/notifications";
-
 export default function Notifications({ token }) {
+   const apiUrl = import.meta.env.BACKEND_URL;
   const [notifications, setNotifications] = useState([]);
 
   const fetchNotifications = async () => {
     try {
-      const res = await axios.get(API_URL, {
+      const res = await axios.get(
+        `${apiUrl}/api/notifications`
+        , {
         headers: { Authorization: `Bearer ${token}` },
       });
       setNotifications(res.data);
@@ -26,7 +26,7 @@ export default function Notifications({ token }) {
     const markAllRead = async () => {
       try {
         await axios.put(
-          `${API_URL}/mark-all-read`,
+          `${apiUrl}/api/notifications/mark-all-read`,
           {},
           {
             headers: { Authorization: `Bearer ${token}` },

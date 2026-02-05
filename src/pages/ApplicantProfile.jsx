@@ -7,6 +7,7 @@ import defaultavatar from "../assets/default-profile.webp";
 import { FaStar, FaRegStar } from "react-icons/fa";
 
 export default function ApplicantProfile({ token }) {
+   const apiUrl = import.meta.env.BACKEND_URL;
   const { id } = useParams();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -16,8 +17,7 @@ export default function ApplicantProfile({ token }) {
   const fetchProfile = async () => {
     try {
       const res = await axios.get(
-        // `http://localhost:5000/api/user/${id}`,
-        `https://timebank-backend-67l5.onrender.com/api/user/${id}`,
+        `${apiUrl}/api/user/${id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

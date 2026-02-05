@@ -4,10 +4,8 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { showCustomToast } from "../utils/toast";
 
-// const API_URL = "http://localhost:5000/api/services";
-const API_URL = "https://timebank-backend-67l5.onrender.com/api/services";
-
 export default function AppliedServices({ token, userId }) {
+   const apiUrl = import.meta.env.BACKEND_URL;
   const [services, setServices] = useState([]);
 
   // 🔹 Pagination state
@@ -16,7 +14,7 @@ export default function AppliedServices({ token, userId }) {
 
   const fetchApplied = async () => {
     try {
-      const res = await axios.get(`${API_URL}/applied`, {
+      const res = await axios.get(`${apiUrl}/api/services/applied`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setServices(res.data);
@@ -29,7 +27,7 @@ export default function AppliedServices({ token, userId }) {
   const handleCompleteRequest = async (serviceId) => {
     try {
       await axios.post(
-        `${API_URL}/${serviceId}/request-completion`,
+        `${apiUrl}/api/services/${serviceId}/request-completion`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );

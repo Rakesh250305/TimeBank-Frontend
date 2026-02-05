@@ -8,9 +8,8 @@ import microsoftLogo from "../assets/Microsoft-logo.png";
 import locationData from "../data/locationData";
 import FloatingField from "../components/FloatingField";
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+const apiUrl = import.meta.env.BACKEND_URL;
 
-// const API_URL = "http://localhost:5000/api/auth";
-const API_URL = "https://timebank-backend-67l5.onrender.com/api/auth";
 
 export default function Signup({ setToken }) {
   const navigate = useNavigate();
@@ -74,7 +73,7 @@ export default function Signup({ setToken }) {
       setError("");
       setLoading(true);
 
-      await axios.post(`${API_URL}/send-otp`, { email: form.email });
+      await axios.post(`${apiUrl}/api/auth/send-otp`, { email: form.email });
       setOtpSent(true);
       setTimer(120);
     } catch (err) {
@@ -91,7 +90,7 @@ export default function Signup({ setToken }) {
     }
     try {
       setLoading(true);
-      const res = await axios.post(`${API_URL}/verify-otp`, {
+      const res = await axios.post(`${apiUrl}/api/auth/verify-otp`, {
         email: form.email,
         otp,
       });
