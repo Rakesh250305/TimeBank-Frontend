@@ -16,19 +16,20 @@ export default function ForgotPassword() {
     const [confirm, setConfirm] = useState("");
     const [otpSent, setOtpSent] = useState(false);
     const [timer, setTimer] = useState(0);
+    const [sendLoading, setSendLoading] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
     const sendOtp = async () => {
         try {
-            setLoading(true);
+            setSendLoading(true);
             await axios.post(`${apiUrl}/api/auth/forgot-password/send-otp`, { email });
             setOtpSent(true);
             setTimer(120);
         } catch (err) {
             setError(err.response?.data?.message);
         } finally {
-            setLoading(false);
+            setSendLoading(false);
         }
     };
 
@@ -120,7 +121,7 @@ export default function ForgotPassword() {
                                             disabled={loading}
                                             className="bg-blue-600 py-2 rounded-lg hover:bg-blue-800 transition"
                                         >
-                                            {loading ? "Sending OTP..." : "Send OTP"}
+                                            {sendLoading ? "Sending OTP..." : "Send OTP"}
                                         </button>
                                     ) : (
                                         <>
@@ -130,15 +131,18 @@ export default function ForgotPassword() {
                                                 placeholder="O T P"
                                                 required
                                                 onChange={(e) => setOtp(e.target.value)}
-                                                className="p-3 rounded-lg bg-gray-800 border-gray-700 text-white  placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-700"
-                                            />
+                                        className="p-3 mb-2 rounded-lg bg-gray-900 text-center tracking-widest text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-700"                                            />
 
                                             <button
                                                 onClick={verifyOtp}
                                                 disabled={loading}
                                                 className="bg-green-600 py-2 rounded-lg hover:bg-green-700 transition"
                                             >
-                                                {loading ? "Verifying..." : "Verify & Change"}
+                                                {sendLoading ? "Sending" : (
+                                                    <>
+                                                    {loading ? "Verifying..." : "Verify & Continue"}
+                                                    </>
+                                                )}
                                             </button>
 
                                             {/* Countdown Timer & Resend Button */}
@@ -183,7 +187,7 @@ export default function ForgotPassword() {
                                             />
                                             <button
                                                 disabled={loading}
-                                                className="bg-blue-400 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition"
+                                                className="bg-blue-600 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg transition"
                                                 onClick={resetPassword}>
                                                 {loading ? "Updating..." : "Reset Password"}
                                             </button>
