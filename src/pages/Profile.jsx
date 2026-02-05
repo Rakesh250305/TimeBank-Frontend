@@ -5,9 +5,9 @@ import defaultavatar from "../assets/default-profile.webp";
 import io from "socket.io-client";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+const apiUrl = import.meta.env.BACKEND_URL;
 
-// const socket = io("http://localhost:5000");
-const socket = io("https://timebank-backend-67l5.onrender.com");
+const socket = io(`${apiUrl}`);
 
 export default function Profile({ token }) {
   const [user, setUser] = useState(null);
@@ -23,7 +23,7 @@ export default function Profile({ token }) {
     try {
       const res = await axios.get(
         // "http://localhost:5000/api/user/profile",
-        "https://timebank-backend-67l5.onrender.com/api/user/profile",
+        `${apiUrl}/api/user/profile`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -51,8 +51,7 @@ export default function Profile({ token }) {
   const fetchAppliedServices = async (userId) => {
     try {
       const res = await axios.get(
-        // "http://localhost:5000/api/services/applied",
-        "https://timebank-backend-67l5.onrender.com/api/services/applied",
+        `${apiUrl}/api/services/applied`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -117,7 +116,7 @@ export default function Profile({ token }) {
     [reviews]
   );
 
-  // ✅ Show congratulations popup if user just signed up
+  //  Show congratulations popup if user just signed up
   useEffect(() => {
     if (localStorage.getItem("firstLogin")) {
       setWelcome(true);

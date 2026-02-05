@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { showCustomToast } from "../utils/toast";
-// const API_URL = "http://localhost:5000/api/services";
-const API_URL = "https://timebank-backend-67l5.onrender.com/api/services";
+const apiUrl = import.meta.env.BACKEND_URL;
+
 
 export default function Services({ token }) {
   const [services, setServices] = useState([]);
@@ -38,9 +38,8 @@ export default function Services({ token }) {
   const fetchProfile = async () => {
     try {
       setLoadingProfile(true);
-      const res = await axios.get(
-        // "http://localhost:5000/api/user/profile", 
-        "https://timebank-backend-67l5.onrender.com/api/user/profile", 
+      const res = await axios.get( 
+        `${apiUrl}/api/user/profile`, 
         {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -59,7 +58,7 @@ export default function Services({ token }) {
   // Fetch open services
   const fetchServices = async () => {
     try {
-      const res = await axios.get(`${API_URL}/open`, {
+      const res = await axios.get(`${apiUrl}/api/services/open`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setServices(res.data || []);
@@ -82,7 +81,7 @@ export default function Services({ token }) {
     try {
       setApplyingIds((prev) => [...prev, id]);
       await axios.post(
-        `${API_URL}/${id}/apply`,
+        `${apiUrl}/api/services/${id}/apply`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );

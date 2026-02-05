@@ -13,6 +13,7 @@ import CtaSection from "./CtaSection";
 import { showCustomToast } from "../utils/toast";
 
 export default function Contact() {
+   const apiUrl = import.meta.env.BACKEND_URL;
   const [form, setForm] = useState({ name: "", email: "", message: "" });
 
   const handleChange = (e) =>
@@ -23,8 +24,7 @@ export default function Contact() {
 
     try {
       const res = await fetch(
-        "https://timebank-backend-67l5.onrender.com/api/contact/send"
-        // "http://localhost:5000/api/contact/send"
+        `${apiUrl}/api/contact/send`
         , {
         method: "POST",
         headers: {

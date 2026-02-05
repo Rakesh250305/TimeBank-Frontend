@@ -3,10 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Footer from "../components/Footer";
 
-// const API_URL = "http://localhost:5000/api/services";
-const API_URL = "https://timebank-backend-67l5.onrender.com/api/services";
-
 export default function EditService({ token }) {
+  const apiUrl = import.meta.env.BACKEND_URL;
   const { id } = useParams();
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -20,7 +18,7 @@ export default function EditService({ token }) {
   useEffect(() => {
     const fetchService = async () => {
       try {
-        const res = await axios.get(`${API_URL}/my-services`, {
+        const res = await axios.get(`${apiUrl}/api/services/my-services`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -45,7 +43,7 @@ export default function EditService({ token }) {
   const handleUpdate = async () => {
     try {
       await axios.put(
-        `${API_URL}/${id}`,
+        `${apiUrl}/api/services/${id}`,
         {
           ...form,
           skillsRequired: form.skillsRequired

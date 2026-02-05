@@ -7,19 +7,18 @@ import {
 import { showCustomToast } from "../utils/toast";
 
 export default function DeleteAccount() {
+   const apiUrl = import.meta.env.BACKEND_URL;
   const [submitted, setSubmitted] = useState(false);
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [file, setFile] = useState(null);
-
   const [emailExists, setEmailExists] = useState(null); // null | true | false
 
   // LIVE EMAIL CHECK
   const checkEmail = async (emailValue) => {
     try {
       const res = await fetch(
-        "https://timebank-backend-67l5.onrender.com/api/user/check-email",
-        // "http://localhost:5000/api/user/check-email",
+        `${apiUrl}/api/user/check-email`,
          {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -52,9 +51,8 @@ export default function DeleteAccount() {
 
     try {
       const res = await fetch(
-        "https://timebank-backend-67l5.onrender.com/api/report/send",
-        // "http://localhost:5000/api/report/send",
-         {
+        `${apiUrl}/api/report/send`,
+        {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, message }),

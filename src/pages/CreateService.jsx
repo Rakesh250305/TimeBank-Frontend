@@ -9,10 +9,8 @@ import { MdTitle } from "react-icons/md";
 import { IoMdSend } from "react-icons/io";
 import { RiArrowGoBackLine } from "react-icons/ri";
 
-// const API_URL = "http://localhost:5000/api/services";
-const API_URL = "https://timebank-backend-67l5.onrender.com/api/services";
-
 export default function CreateService({ token }) {
+   const apiUrl = import.meta.env.BACKEND_URL;
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -27,7 +25,7 @@ export default function CreateService({ token }) {
     setLoading(true);
     try {
       await axios.post(
-        API_URL,
+        `${apiUrl}/api/services`,
         {
           ...form,
           skillsRequired: form.skillsRequired.split(",").map((s) => s.trim()),

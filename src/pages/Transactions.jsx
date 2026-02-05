@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Navbar from "../components/Navbar";
+const apiUrl = import.meta.env.BACKEND_URL;
+
 
 export default function Transactions({ token }) {
   const [transactions, setTransactions] = useState([]);
@@ -8,8 +10,7 @@ export default function Transactions({ token }) {
   const fetchTransactions = async () => {
     try {
       const res = await axios.get(
-        // "http://localhost:5000/api/transactions",
-        "https://timebank-backend-67l5.onrender.com/api/transactions", 
+        `${apiUrl}/api/transactions`, 
         {
         headers: { Authorization: `Bearer ${token}` },
       });
