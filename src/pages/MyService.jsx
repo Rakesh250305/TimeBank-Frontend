@@ -11,7 +11,7 @@ import { RiArrowGoBackLine } from "react-icons/ri";
 import { IoMdSend } from "react-icons/io";
 
 export default function MyServices({ token }) {
-   const apiUrl = import.meta.env.BACKEND_URL;
+   const apiUrl = import.meta.env.VITE_BACKEND_URL;
   const navigate = useNavigate();
   const [services, setServices] = useState([]);
   const [editingService, setEditingService] = useState(null);

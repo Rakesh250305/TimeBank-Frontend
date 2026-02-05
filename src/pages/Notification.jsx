@@ -3,7 +3,7 @@ import axios from "axios";
 import Navbar from "../components/Navbar";
 
 export default function Notifications({ token }) {
-   const apiUrl = import.meta.env.BACKEND_URL;
+   const apiUrl = import.meta.env.VITE_BACKEND_URL;
   const [notifications, setNotifications] = useState([]);
 
   const fetchNotifications = async () => {

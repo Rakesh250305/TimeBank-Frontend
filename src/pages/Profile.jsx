@@ -5,7 +5,7 @@ import defaultavatar from "../assets/default-profile.webp";
 import io from "socket.io-client";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-const apiUrl = import.meta.env.BACKEND_URL;
+const apiUrl = import.meta.env.VITE_BACKEND_URL;
 
 const socket = io(`${apiUrl}`);
 

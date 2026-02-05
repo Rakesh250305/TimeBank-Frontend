@@ -2,17 +2,6 @@ import Footer from "./Footer";
 import { FaBalanceScale, FaGavel } from "react-icons/fa";
 
 export default function Terms() {
-  const sections = [
-    "Acceptance of Terms",
-    "User Responsibilities",
-    "Prohibited Activities",
-    "Account Termination",
-    "Intellectual Property",
-    "Limitation of Liability",
-    "Changes to Terms",
-    "Contact"
-  ];
-
   return (
     <div className="flex flex-col min-h-screen font-sans">
       <header className="bg-indigo-600 text-white py-12 text-center shadow-lg">

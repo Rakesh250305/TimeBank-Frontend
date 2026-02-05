@@ -8,7 +8,7 @@ import microsoftLogo from "../assets/Microsoft-logo.png";
 import locationData from "../data/locationData";
 import FloatingField from "../components/FloatingField";
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
-const apiUrl = import.meta.env.BACKEND_URL;
+const apiUrl = import.meta.env.VITE_BACKEND_URL;
 
 
 export default function Signup({ setToken }) {
