@@ -1,35 +1,62 @@
 import { useState } from "react";
-import { login } from "../api/api";
 import { useNavigate } from "react-router-dom";
 import login_bg from "../assets/login_page_bg.png";
 import googleLogo from "../assets/Google_logo.png";
 import microsoftLogo from "../assets/Microsoft-logo.png";
+const apiUrl = import.meta.env.BACKEND_URL;
 
-export default function Login({ setToken }) {
-  const [form, setForm] = useState({ email: "", password: "" });
+export default function ForgotPassword() {
+      const navigate = useNavigate();
+  const [step, setStep] = useState(1);
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
   const [error, setError] = useState("");
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+   const sendOtp = async () => {
+    try {
+      setLoading(true);
+      await axios.post(`${apiUrl}/api/auth/forgot-password/send-otp`, { email });
+      setStep(2);
+    } catch (err) {
+      setError(err.response?.data?.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+  const verifyOtp = async () => {
     try {
-      const payload = { ...form, email: form.email.toLowerCase() };
-      const res = await login(payload);
-
-      setToken(res.data.token);
-      localStorage.setItem("token", res.data.token);
-      navigate("/profile");
+      setLoading(true);
+      await axios.post(`${apiUrl}/api/auth/forgot-password/verify-otp`, {
+        email,
+        otp,
+      });
+      setStep(3);
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Login failed, please try again."
-      );
+      setError(err.response?.data?.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetPassword = async () => {
+    if (password !== confirm) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await axios.post(`${apiUrl}/api/auth/forgot-password/reset`, {
+        email,
+        password,
+      });
+      navigate("/login");
+    } catch (err) {
+      setError(err.response?.data?.message);
     } finally {
       setLoading(false);
     }
@@ -55,12 +82,12 @@ export default function Login({ setToken }) {
 
           <div className="flex lg:flex-row flex-col">
             {/* left info */}
-            <form
+            {/* <form
               className="flex flex-col w-full lg:w-[50%] lg:px-5 gap-1"
               onSubmit={handleSubmit}
             >
               <h2 className="border-b-1 py-2 border-gray-500 text-xl font-bold">
-                Login
+                Reset Password
               </h2>
               <h2 className="py-2">Email</h2>
               <input
@@ -101,7 +128,75 @@ export default function Login({ setToken }) {
               {error && (
                 <p className="text-red-500 text-sm text-center mt-2">{error}</p>
               )}
-            </form>
+            </form> */}
+
+             <div
+              className="flex flex-col w-full lg:w-[50%] lg:px-5 gap-1"
+            >
+              <h2 className="border-b-1 py-2 border-gray-500 text-xl font-bold">
+                Reset Password
+              </h2>
+              {step === 1 && (
+        <>
+         <h2 className="py-2">Email</h2>
+          <input
+            type="email"
+            name="email"
+            placeholder="Registered Email"
+            onChange={(e) => setEmail(e.target.value)}
+            className="p-3 mb-2 rounded-lg bg-gray-900 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-700"
+            required
+          />
+          <button
+                className="bg-blue-600 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg transition"
+           onClick={sendOtp}>Send OTP</button>
+        </>
+      )}
+
+      {step === 2 && (
+        <>
+        <h2 className="py-2">OTP</h2>
+          <input
+            placeholder="Enter OTP"
+            onChange={(e) => setOtp(e.target.value)}
+            className="p-3 mb-2 rounded-lg bg-gray-900 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-700"
+            required
+          />
+          <button
+                className="bg-green-400 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition"
+           onClick={verifyOtp}>Verify OTP</button>
+        </>
+      )}
+
+      {step === 3 && (
+        <>
+        <h2 className="py-2">New Password</h2>
+          <input
+            type="password"
+            placeholder="New Password"
+            onChange={(e) => setPassword(e.target.value)}
+            className="p-3 mb-2 rounded-lg bg-gray-900 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-700"
+                required
+          />
+          <h2 className="py-2">Confirm Password</h2>
+          <input
+            type="password"
+            placeholder="Confirm Password"
+            onChange={(e) => setConfirm(e.target.value)}
+            className="p-3 mb-2 rounded-lg bg-gray-900 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-700"
+            required
+          />
+          <button
+           disabled={loading}
+            className="bg-green-400 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition"
+           onClick={resetPassword}>Update Password</button>
+        </>
+      )}
+              
+              {error && (
+                <p className="text-red-500 text-sm text-center mt-2">{error}</p>
+              )}
+            </div>
 
             {/* right Form */}
             <div className="flex flex-col gap-5 lg:gap-10 w-full lg:w-[50%] lg:border-l-1 border-t lg:border-t-0 border-gray-600 pt-5 lg:p-5 mt-5 lg:mt-0">
