@@ -25,6 +25,8 @@ import ApplicantProfile from "./pages/ApplicantProfile";
 import DeleteAccount from "./components/DeleteAccount";
 import InstallPWA from "./components/InstallPWA";
 import ForgotPassword from "./pages/ForgotPassword";
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -36,20 +38,46 @@ function ScrollToTop() {
   return null
 }
 
+// function to decode JWT token
+function decodeToken(token) {
+  try {
+    if (!token) return null;
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    return null;
+  }
+}
+
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     const stored = localStorage.getItem("token");
     if (stored && stored !== token) {
       setToken(stored);
     }
+
+    // decode token to get userId
+    if(stored) {
+      const decoded = decodeToken(stored);
+      if(decoded && decoded.id) {
+        setUserId(decoded.id);
+      }
+    }
   }, [token]);
 
-  // ✅ logout function
+  // logout function
   const handleLogout = () => {
     localStorage.removeItem("token");
     setToken("");
+    setUserId(null);
   };
 
   return (
@@ -136,18 +164,7 @@ function App() {
             path="/applied-services"
             element={
               token ? (
-                <AppliedServices token={token} />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
-
-          <Route
-            path="/applied-services/:id"
-            element={
-              token ? (
-                <AppliedServices token={token} />
+                <AppliedServices token={token} userId={userId}/>
               ) : (
                 <Navigate to="/login" replace />
               )
@@ -195,6 +212,10 @@ function App() {
               )
             }
           />
+
+          {/* for admin */}
+            <Route path="/admin" element={<AdminLogin/>}></Route>
+            <Route path="/admin/dashboard" element={<AdminDashboard/>}></Route>
 
           {/* Catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />

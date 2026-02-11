@@ -291,10 +291,10 @@ export default function Profile({ token }) {
                         : "bg-gray-100 text-gray-700"
                     }`}
                   >
-                    {srv.status === "requested" && "⏳ Pending"}
+                    {srv.status === "open" && "⏳ Pending"}
                     {srv.status === "processing" && "✅ Accepted (In Progress)"}
                     {srv.status === "completed" && "🎉 Completed"}
-                    {srv.status === "open" && "❌ Rejected - Reopened"}
+                    {srv.status === "rejected" && "❌ Rejected - Reopened"}
                   </span>
                 </li>
               ))}

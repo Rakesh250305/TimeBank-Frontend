@@ -11,7 +11,7 @@ import { RiArrowGoBackLine } from "react-icons/ri";
 import { IoMdSend } from "react-icons/io";
 
 export default function MyServices({ token }) {
-   const apiUrl = import.meta.env.VITE_BACKEND_URL;
+  const apiUrl = import.meta.env.VITE_BACKEND_URL;
   const navigate = useNavigate();
   const [services, setServices] = useState([]);
   const [editingService, setEditingService] = useState(null);
@@ -38,6 +38,7 @@ export default function MyServices({ token }) {
       const res = await axios.get(`${apiUrl}/api/services/my-services`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      // console.log(res);
       setServices(res.data);
     } catch (err) {
       console.error("Error fetching my services:", err);
@@ -72,7 +73,10 @@ export default function MyServices({ token }) {
     try {
       await axios.put(
         `${apiUrl}/api/services/${modalService._id}/approve`,
-        { applicantId: modalService.applicantId },
+        {
+          applicantId: modalService.applicantId,
+          approvalmessage: message
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       closeModal();
@@ -91,7 +95,7 @@ export default function MyServices({ token }) {
   const handleConfirmCompletion = async () => {
     try {
       await axios.put(
-        `${apiUrl}/api/serices/${modalService._id}/confirm-completion`,
+        `${apiUrl}/api/services/${modalService._id}/confirm-completion`,
         { message, rating },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -212,6 +216,19 @@ export default function MyServices({ token }) {
   const indexOfFirst = indexOfLast - itemsPerPage;
   const currentServices = services.slice(indexOfFirst, indexOfLast);
 
+  const isSelected = (service, applicantId) => {
+    if (!service.selectedApplicant) return false;
+
+    // selectedApplicant may be object or id
+    const selectedId =
+      typeof service.selectedApplicant === "object"
+        ? service.selectedApplicant._id
+        : service.selectedApplicant;
+
+    return selectedId === applicantId;
+  };
+
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar token={token} />
@@ -230,19 +247,18 @@ export default function MyServices({ token }) {
               <div
                 key={s._id}
                 className={`border p-4 rounded bg-white flex flex-col gap-1 relative
-                               ${
-                                 s.status === "open"
-                                   ? "bg-green-100 text-black border-green-500 border-3"
-                                   : s.status === "requested"
-                                   ? "bg-gray-100 text-black border-gray-400 border-3"
-                                   : s.status === "processing"
-                                   ? "bg-yellow-10 text-black border-yellow-500 border-3"
-                                   : s.status === "completion_requested"
-                                   ? "bg-red-100 text-black border-fuchsia-500 border-3"
-                                   : s.status === "completed"
-                                   ? "bg-blue-100 text-black border-blue-500 border-3"
-                                   : "bg-red-100 text-black border-red-500 border-3"
-                               }`}
+                               ${s.status === "open"
+                    ? "bg-green-100 text-black border-green-500 border-3"
+                    : s.status === "requested"
+                      ? "bg-gray-100 text-black border-gray-400 border-3"
+                      : s.status === "processing"
+                        ? "bg-yellow-10 text-black border-yellow-500 border-3"
+                        : s.status === "completion_requested"
+                          ? "bg-red-100 text-black border-fuchsia-500 border-3"
+                          : s.status === "completed"
+                            ? "bg-blue-100 text-black border-blue-500 border-3"
+                            : "bg-red-100 text-black border-red-500 border-3"
+                  }`}
               >
                 <h3 className="text-lg font-semibold">Title: {s.title}</h3>
                 <p>{s.description}</p>
@@ -252,83 +268,68 @@ export default function MyServices({ token }) {
                 <p>
                   <strong>Time Period:</strong> {s.timePeriod} hours
                 </p>
-                {/* <p>
-                  <strong>Applied By:</strong>{" "}
-                  <span
-                    className="text-blue-600 hover:underline cursor-pointer"
-                    onClick={() => navigate(`/applicant/${s.requestedBy?._id}`)}
-                  >
-                    {s.requestedBy?.email || "N/A"}
-                  </span>
-                </p> */}
 
-                {/* {s.status === "processing" && s.requestedBy && (
-                  <p>
-                    <strong className="text-green-600">Assigned To:</strong>{" "}
-                    {s.requestedBy.name} ({s.requestedBy.email})
-                  </p>
-                )}
-
-                {s.status === "requested" && (
-                  <div className="flex gap-2 mt-2 text-xs md:text-base">
-                    <button
-                      onClick={() => openModal(s, "approveApplication")}
-                      className="bg-green-600 w-1/2 text-white px-3 py-1 rounded hover:bg-green-700"
-                    >
-                      ✅ Approve Application
-                    </button>
-                    <button
-                      onClick={async () => {
-                        await axios.put(
-                          `${API_URL}/${s._id}/reject-application`,
-                          {},
-                          { headers: { Authorization: `Bearer ${token}` } }
-                        );
-                        showCustomToast("reject", "Rejected Successfully");
-                        fetchMyServices();
-                      }}
-                      className="bg-red-600 w-1/2 text-white px-3 py-1 rounded hover:bg-red-700"
-                    >
-                      ❌ Reject Application
-                    </button>
-                  </div>
-                )} */}
 
                 {Array.isArray(s.applicants) && s.applicants.length > 0 ? (
                   <div className="mt-1">
                     <strong>Applicants:</strong>
 
-                    {s.applicants.length <= 2 ? (
-                      // ✅ Show directly if 2 or fewer
+                    {s.applicants.length <= 1 ? (
+                      // Show directly if 2 or fewer
                       <ul className="ml-1 mt-1 list-disc">
                         {s.applicants.map((applicant) => (
                           <li
                             key={applicant._id}
-                            className="flex justify-between gap-2 items-center py-1 border-b border-gray-200"
+                            className={`flex justify-between gap-2 items-center py-1 border-b border-gray-200 rounded px-2
+                            ${isSelected(s, applicant.user._id)
+                                ? "bg-green-100 border-green-400 border font-bold"
+                                : ""
+                              }`}
                           >
                             <div
-                              className="text-blue-600 hover:underline cursor-pointer"
+                              className={`hover:underline cursor-pointer 
+                                ${isSelected(s, applicant.user._id)
+                                  ? "text-green-700 font-bold"
+                                  : "text-blue-600"
+                                }`}
                               onClick={() =>
                                 navigate(`/applicant/${applicant.user._id}`)
                               }
                             >
-                              {applicant.user.firstName}{" "}
-                              {applicant.user.lastName} ({applicant.user.email})
+                              {applicant.user.firstName}{" "}{applicant.user.lastName}
+                              <span className="text-gray-500 text-sm">
+                                ({applicant.user.email})
+                              </span>
+
+                              {isSelected(s, applicant.user._id) && (
+                                <>
+                                  {s.status === "processing" ? (
+                                    <span className="ml-2 text-xs bg-green-600 text-white px-2 py-0.5 rounded-full">
+                                      Approved
+                                    </span>
+                                  ) : (
+                                    <span className="ml-2 text-xs bg-green-600 text-white px-2 py-0.5 rounded-full">
+                                      Completed
+                                    </span>
+                                  )}
+
+                                </>
+                              )}
                             </div>
 
                             {(s.status === "open" ||
-                              s.status === "requested") && (
-                              <select
-                                className="appearance-none bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 text-xs cursor-pointer transition duration-200 focus:ring-2 focus:ring-green-400 outline-none"
-                                onChange={(e) =>
-                                  handleAction(e, s, applicant.user._id)
-                                }
-                              >
-                                <option value="">Action</option>
-                                <option value="approve">Approve</option>
-                                <option value="reject">Reject</option>
-                              </select>
-                            )}
+                              s.status === "requested") && !isSelected(s, applicant.user._id) && (
+                                <select
+                                  className="appearance-none bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 text-xs cursor-pointer transition duration-200 focus:ring-2 focus:ring-green-400 outline-none"
+                                  onChange={(e) =>
+                                    handleAction(e, s, applicant.user._id)
+                                  }
+                                >
+                                  <option value="">Action</option>
+                                  <option value="approve">Approve</option>
+                                  <option value="reject">Reject</option>
+                                </select>
+                              )}
                           </li>
                         ))}
                       </ul>
@@ -355,15 +356,15 @@ export default function MyServices({ token }) {
                     <div className="flex gap-2 mt-2 text-xs md:text-base  ">
                       <button
                         onClick={() => openModal(s, "confirmCompletion")}
-                        className="bg-green-600 w-1/2 text-white px-3 py-1 rounded hover:bg-green-700"
+                        className="bg-green-600 w-1/2 text-white px-3 py-2 rounded hover:bg-green-700"
                       >
-                        ✅ Confirm Completion
+                        Confirm Completion
                       </button>
                       <button
                         onClick={() => handleReject(s._id)}
-                        className="bg-red-600 w-1/2 text-white px-3 py-1 rounded hover:bg-red-700"
+                        className="bg-red-600 w-1/2 text-white px-3 py-2 rounded hover:bg-red-700"
                       >
-                        ❌ Reject Completion
+                        Reject Completion
                       </button>
                     </div>
                   )}
@@ -379,11 +380,10 @@ export default function MyServices({ token }) {
                       }
                       openEditModal(s);
                     }}
-                    className={`px-3 py-1 rounded text-white ${
-                      s.status === "open"
-                        ? "bg-blue-400 hover:bg-blue-600"
-                        : "bg-gray-200 cursor-not-allowed"
-                    }`}
+                    className={`px-3 py-1 rounded text-white ${s.status === "open"
+                      ? "bg-blue-400 hover:bg-blue-600"
+                      : "bg-gray-200 cursor-not-allowed"
+                      }`}
                     disabled={s.status !== "open"}
                   >
                     ✏️
@@ -391,11 +391,10 @@ export default function MyServices({ token }) {
 
                   <button
                     onClick={() => handleDelete(s)}
-                    className={`px-3 py-1 rounded text-white ${
-                      s.status === "open"
-                        ? "bg-red-400 hover:bg-red-600"
-                        : "bg-gray-200 cursor-not-allowed"
-                    }`}
+                    className={`px-3 py-1 rounded text-white ${s.status === "open"
+                      ? "bg-red-400 hover:bg-red-600"
+                      : "bg-gray-200 cursor-not-allowed"
+                      }`}
                     disabled={s.status !== "open"}
                   >
                     🗑
@@ -628,11 +627,10 @@ export default function MyServices({ token }) {
                       className="focus:outline-none"
                     >
                       <FaStar
-                        className={`h-7 w-7 transition-transform duration-200 ${
-                          rating >= star
-                            ? "text-yellow-400 scale-110"
-                            : "text-gray-300 hover:text-yellow-300"
-                        }`}
+                        className={`h-7 w-7 transition-transform duration-200 ${rating >= star
+                          ? "text-yellow-400 scale-110"
+                          : "text-gray-300 hover:text-yellow-300"
+                          }`}
                       />
                     </button>
                   ))}
@@ -671,21 +669,32 @@ export default function MyServices({ token }) {
                         {modalService.applicants.map((applicant, index) => (
                           <li
                             key={applicant._id || index}
-                            className="py-2 flex justify-between items-center"
+                            className={`py-2 flex justify-between items-center rounded px-2
+                               ${isSelected(modalService, applicant.user?._id)
+                                ? "bg-green-100 border border-green-400 font-bold"
+                                : ""
+                              }`}
                           >
-                            {/* ✅ User info or fallback */}
+                            {/*  User info or fallback */}
                             {applicant.user ? (
                               <div
-                                className="text-blue-600 hover:underline cursor-pointer"
-                                onClick={() =>
-                                  navigate(`/applicant/${applicant.user._id}`)
-                                }
+                                className={`cursor-pointer hover:underline
+                                 ${isSelected(modalService, applicant.user?._id)
+                                    ? "text-green-700 font-bold"
+                                    : "text-blue-600"
+                                  }`}
+                                onClick={() => navigate(`/applicant/${applicant.user._id}`)}
                               >
-                                {applicant.user.firstName}{" "}
-                                {applicant.user.lastName}{" "}
+                                {applicant.user.firstName} {applicant.user.lastName}
                                 <span className="text-gray-500 text-sm">
                                   ({applicant.user.email})
                                 </span>
+
+                                {isSelected(modalService, applicant.user._id) && (
+                                  <span className="ml-2 text-xs bg-green-600 text-white px-2 py-0.5 rounded-full">
+                                    Approved
+                                  </span>
+                                )}
                               </div>
                             ) : (
                               <div className="text-gray-400 italic">
@@ -693,7 +702,7 @@ export default function MyServices({ token }) {
                               </div>
                             )}
 
-                            {/* ✅ Single select radio */}
+                            {/*  Single select radio */}
                             {applicant.user && (
                               <input
                                 type="radio"
@@ -703,8 +712,10 @@ export default function MyServices({ token }) {
                                   setSelectedApplicant(applicant.user._id)
                                 }
                                 checked={
-                                  selectedApplicant === applicant.user._id
+                                  selectedApplicant === applicant.user._id ||
+                                  isSelected(modalService, applicant.user._id)
                                 }
+
                               />
                             )}
                           </li>
@@ -714,57 +725,57 @@ export default function MyServices({ token }) {
                   )}
                 </ul>
 
-                {/* ✅ Approve + Close buttons */}
-                <div className="flex justify-center gap-4 mt-6">
-                  <button
-                    onClick={async () => {
-                      if (!selectedApplicant) {
-                        showCustomToast(
-                          "error",
-                          "Please select an applicant first"
-                        );
-                        return;
-                      }
-                      try {
-                        await axios.put(
-                          `${API_URL}/${modalService._id}/approve`,
-                          { applicantId: selectedApplicant },
-                          { headers: { Authorization: `Bearer ${token}` } }
-                        );
-                        showCustomToast(
-                          "success",
-                          "Applicant approved successfully!"
-                        );
-                        fetchMyServices();
-                        closeModal();
-                      } catch (err) {
-                        console.error("Approval failed:", err);
-                        showCustomToast("error", "Failed to approve applicant");
-                      }
-                    }}
-                    className={`px-5 py-2 rounded-lg text-white font-semibold ${
-                      selectedApplicant
-                        ? "bg-green-600 hover:bg-green-700"
-                        : "bg-gray-400 cursor-not-allowed"
-                    }`}
-                    disabled={!selectedApplicant}
-                  >
-                    Approve
-                  </button>
+                {/* ✅ Approve + Close buttons
+                // <div className="flex justify-center gap-4 mt-6">
+                //   <button
+                //     onClick={async () => {
+                //       if (!selectedApplicant) {
+                //         showCustomToast(
+                //           "error",
+                //           "Please select an applicant first"
+                //         );
+                //         return;
+                //       }
+                //       try {
+                //         await axios.put(
+                //           `${apiUrl}/${modalService._id}/approve`,
+                //           { applicantId: selectedApplicant },
+                //           { headers: { Authorization: `Bearer ${token}` } }
+                //         );
+                //         showCustomToast(
+                //           "success",
+                //           "Applicant approved successfully!"
+                //         );
+                //         fetchMyServices();
+                //         closeModal();
+                //       } catch (err) {
+                //         console.error("Approval failed:", err);
+                //         showCustomToast("error", "Failed to approve applicant");
+                //       }
+                //     }}
+                //     className={`px-5 py-2 rounded-lg text-white font-semibold ${
+                //       selectedApplicant
+                //         ? "bg-green-600 hover:bg-green-700"
+                //         : "bg-gray-400 cursor-not-allowed"
+                //     }`}
+                //     disabled={!selectedApplicant}
+                //   >
+                //     Approve
+                //   </button>
 
-                  <button
-                    onClick={closeModal}
-                    className="px-5 py-2 rounded-lg bg-gray-200 hover:bg-gray-300"
-                  >
-                    Close
-                  </button>
-                </div>
+                //   <button
+                //     onClick={closeModal}
+                //     className="px-5 py-2 rounded-lg bg-gray-200 hover:bg-gray-300"
+                //   >
+                //     Close
+                //   </button>
+                // </div> */}
               </>
             )}
           </div>
         </div>
       )}
-      
+
 
       <Footer />
     </div>

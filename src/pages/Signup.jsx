@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { signup } from "../api/api";
 import { useNavigate } from "react-router-dom";
 import login_bg from "../assets/login_page_bg.png";
 import googleLogo from "../assets/Google_logo.png";
@@ -64,6 +63,7 @@ export default function Signup({ setToken }) {
       });
     }
   };
+
   const handleSendOtp = async () => {
     if (!form.email) {
       setError("Please enter an email address");
@@ -164,7 +164,6 @@ export default function Signup({ setToken }) {
           setError("Please enter a valid phone number (10–15 digits).");
           return false;
         }
-
         break;
 
       case 3: // Academic Details
@@ -309,7 +308,7 @@ export default function Signup({ setToken }) {
         confirmPassword: form.confirmPassword,
       };
 
-      const res = await signup(payload);
+      const res = await axios.post(`${apiUrl}/api/auth/signup`, payload);
       setToken(res.data.token);
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("firstLogin", "true");
