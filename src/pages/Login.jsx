@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { login } from "../api/api";
 import { useNavigate } from "react-router-dom";
 import login_bg from "../assets/login_page_bg.png";
 import googleLogo from "../assets/Google_logo.png";
 import microsoftLogo from "../assets/Microsoft-logo.png";
+const apiUrl = import.meta.env.VITE_BACKEND_URL;
+import axios from "axios";
 
 export default function Login({ setToken }) {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -21,7 +22,7 @@ export default function Login({ setToken }) {
     setError("");
     try {
       const payload = { ...form, email: form.email.toLowerCase() };
-      const res = await login(payload);
+      const res = await axios.post(`${apiUrl}/api/auth/login`, payload);
 
       setToken(res.data.token);
       localStorage.setItem("token", res.data.token);

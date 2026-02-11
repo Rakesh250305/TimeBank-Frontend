@@ -95,7 +95,6 @@ export default function Account({ token }) {
       };
 
       const { data } = await axios.put(
-        // "http://localhost:5000/api/user/profile",
         `${apiUrl}/api/user/profile`,
 
         payload,
