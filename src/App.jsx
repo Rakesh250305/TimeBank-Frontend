@@ -35,7 +35,7 @@ import ReportIssue from "./components/ReportIssue";
 import AllReports from "./pages/admin/AllReports";
 import AllContacts from "./pages/admin/AllContacts";
 import BroadcastNotification from "./pages/admin/BroadcastNotification";
-import Transactions from "../src/pages/admin/Transactions"
+import AdminTransactions from "../src/pages/admin/AdminTransactions"
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -205,7 +205,7 @@ function App() {
               <Route index element={<AdminDashboard />} />
               <Route path="users" element={<AllUsers/>} />
               <Route path="services" element={<AllServices/>} />
-              <Route path="transactions" element={<Transactions/>} />
+              <Route path="transactions" element={<AdminTransactions/>} />
               <Route path="reports" element={<AllReports/>} />
               <Route path="broadcast" element={<BroadcastNotification/>} />
               <Route path="contacts" element={<AllContacts/>} />
