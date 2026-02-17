@@ -5,7 +5,7 @@ import { FaArrowDown, FaArrowUp, FaCoins, FaExchangeAlt, FaSearch } from "react-
 
 const apiUrl = import.meta.env.VITE_BACKEND_URL;
 
-export default function AllTransactions() {
+export default function Transactions() {
 const navigate = useNavigate();
 const [transactions, setTransactions] = useState([]);
 const [filter, setFilter] = useState("all");
