@@ -22,7 +22,7 @@ export default function AdminLogin() {
             const data = res.data;
             if (data.success) {
                 sessionStorage.setItem("adminToken", data.token);
-                navigate("/admin/dashboard");
+                navigate("/admin");
                 showCustomToast(
                         "success",
                         data.message || "Login successful",
@@ -52,8 +52,8 @@ export default function AdminLogin() {
         <div className="w-full max-w-5xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-2xl overflow-hidden flex flex-col md:flex-row">
 
             {/* LEFT PANEL */}
-            <div className="md:w-1/2 bg-blue-600 text-white p-10 flex flex-col justify-center">
-                <h1 className="text-4xl font-bold mb-4">TimeBank Admin</h1>
+            <div className="hidden lg:block md:w-1/2 bg-blue-600 text-white p-10 lg:flex flex-col justify-center">
+                <h1 className=" text-4xl font-bold mb-4">TimeBank Admin</h1>
                 <p className="text-lg text-blue-100 leading-relaxed">
                     Secure access to the administration dashboard.
                     Manage users, monitor services, approve requests
@@ -66,7 +66,7 @@ export default function AdminLogin() {
                 onSubmit={handleLogin}
                 className="md:w-1/2 p-8 md:p-12 text-white flex flex-col justify-center"
             >
-                <h2 className="text-3xl font-semibold mb-6 text-center">
+                <h2 className="text-xl lg:text-3xl font-semibold mb-6 text-center">
                     Admin Login
                 </h2>
 
@@ -80,7 +80,7 @@ export default function AdminLogin() {
                         required
                         placeholder="Enter admin username"
                         value={username}
-                        onChange={(e) => setUsername(e.target.value)}
+                        onChange={(e) => setUsername(e.target.value.toLowerCase())}
                         className="w-full px-4 py-3 rounded-lg bg-white/10 border border-gray-500/40 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                     />
                 </div>

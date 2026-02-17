@@ -11,6 +11,9 @@ export default function Login({ setToken }) {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [error, setError] = useState("");
+  const [suspend, setSuspend] = useState(false);
+  const [reason, setReason] = useState("");
+
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -28,9 +31,14 @@ export default function Login({ setToken }) {
       localStorage.setItem("token", res.data.token);
       navigate("/profile");
     } catch (err) {
+      if (err.response.status === 403){
+        setSuspend(true);
+        setReason(err.response?.data);
+      } else{
       setError(
         err.response?.data?.message || "Login failed, please try again."
       );
+    }
     } finally {
       setLoading(false);
     }
@@ -140,6 +148,16 @@ export default function Login({ setToken }) {
                   Sign up
                 </span>
               </p>
+
+               <p className="text-sm text-center text-gray-300">
+                Only for authorities -{" "}
+                <span
+                  onClick={() => navigate("/adminLogin")}
+                  className="text-blue-500 font-semibold cursor-pointer hover:underline"
+                >
+                  Admin Login
+                </span>
+              </p>
             </div>
           </div>
           <div className="mt-10 text-center text-gray-400 text-xs border-t-1 border-gray-500 pt-5">
@@ -156,6 +174,61 @@ export default function Login({ setToken }) {
             <span>© TimeBank, Inc. 2025</span>
           </div>
         </div>
+
+
+        {suspend && reason && (
+  <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+    <div className="bg-white rounded-2xl w-[95%] max-w-md p-6 text-gray-800">
+
+      <h2 className="text-2xl font-bold text-red-600 mb-2 text-center">
+        {reason.type === "banned"
+          ? "Account Banned"
+          : "Account Suspended"}
+      </h2>
+
+      {/* REASON */}
+      <div className="bg-gray-100 rounded-lg p-4 mb-4">
+        <p className="font-semibold mb-1">Reason:</p>
+        <p className="text-sm">{reason.reason || "No reason provided by admin."}</p>
+      </div>
+
+      {/* SUSPEND UNTIL */}
+      {reason.type === "suspended" && reason.suspendedUntil && (
+        <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 mb-4">
+          <p className="text-sm">
+            <b>Suspended Until:</b>
+            <br />
+            {reason.suspendedUntil}
+          </p>
+        </div>
+      )}
+
+      {/* CONTACT ADMIN */}
+      <div className="bg-blue-50 border border-blue-300 rounded-lg p-4 mb-5">
+        <p className="text-sm mb-2 font-semibold">Need Help?</p>
+        <p className="text-xs text-gray-600">
+          If you believe this was a mistake, please contact support using the contact form.
+        </p>
+
+        <button
+          onClick={() => navigate("/contact")}
+          className="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg"
+        >
+          Contact Support
+        </button>
+      </div>
+
+      <button
+        onClick={() => setSuspend(false)}
+        className="w-full bg-gray-800 text-white py-2 rounded-lg hover:bg-gray-900"
+      >
+        Close
+      </button>
+
+    </div>
+  </div>
+)}
+
       </div>
     </>
   );

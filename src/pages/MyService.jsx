@@ -269,7 +269,6 @@ export default function MyServices({ token }) {
                   <strong>Time Period:</strong> {s.timePeriod} hours
                 </p>
 
-
                 {Array.isArray(s.applicants) && s.applicants.length > 0 ? (
                   <div className="mt-1">
                     <strong>Applicants:</strong>
@@ -295,8 +294,8 @@ export default function MyServices({ token }) {
                               onClick={() =>
                                 navigate(`/applicant/${applicant.user._id}`)
                               }
-                            >
-                              {applicant.user.firstName}{" "}{applicant.user.lastName}
+                            > 
+                            {applicant.user.firstName}{" "}{applicant.user.lastName}
                               <span className="text-gray-500 text-sm">
                                 ({applicant.user.email})
                               </span>

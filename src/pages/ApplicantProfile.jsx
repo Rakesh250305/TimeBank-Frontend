@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import defaultavatar from "../assets/default-profile.webp";
 import { FaStar, FaRegStar } from "react-icons/fa";
 
 export default function ApplicantProfile({ token }) {
@@ -113,7 +112,7 @@ export default function ApplicantProfile({ token }) {
           {/* Profile Picture */}
           <div className="absolute -top-16 left-1/2 -translate-x-1/2">
             <img
-              src={profilePhoto || defaultavatar}
+              src={profilePhoto || "https://ui-avatars.com/api/?name=" + firstName.slice(0,1) + lastName.slice(0,1)}
               alt="Profile"
               className="w-32 h-32 object-cover rounded-full border-blue-500 border-3 p-0.5 shadow-lg shadow-black/50"
             />

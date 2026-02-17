@@ -27,6 +27,15 @@ import InstallPWA from "./components/InstallPWA";
 import ForgotPassword from "./pages/ForgotPassword";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AllUsers from "./pages/admin/AllUsers";
+import AdminProtectedRoute from "./components/admin/AdminProtectedRoute";
+import AdminLayout from "./admin/AdminLayout";
+import AllServices from "./pages/admin/AllServices";
+import AllTransactions from "./pages/admin/AllTransactions";
+import ReportIssue from "./components/ReportIssue";
+import AllReports from "./pages/admin/AllReports";
+import AllContacts from "./pages/admin/AllContacts";
+import BroadcastNotification from "./pages/admin/BroadcastNotification";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -93,14 +102,13 @@ function App() {
           <Route path="/terms" element={<Terms />} />
           <Route path="/community" element={<Community />} />
           <Route path="delete-account" element={<DeleteAccount/>}/>
+          <Route path="/report" element={<ReportIssue/>} />
           <Route path="/signup" element={<Signup setToken={setToken} />} />
           <Route path="/login" element={<Login setToken={setToken} />} />
           <Route path="/forgetPassword" element={<ForgotPassword/>} />
 
           {/* Protected routes */}
-          <Route
-            path="/profile"
-            element={
+          <Route path="/profile" element={
               token ? (
                 <Profile token={token} onLogout={handleLogout} />
               ) : (
@@ -108,9 +116,8 @@ function App() {
               )
             }
           />
-          <Route
-            path="/service"
-            element={
+
+          <Route path="/service" element={
               token ? (
                 <Services token={token} />
               ) : (
@@ -118,9 +125,8 @@ function App() {
               )
             }
           />
-          <Route
-            path="/create-service"
-            element={
+
+          <Route path="/create-service" element={
               token ? (
                 <CreateService token={token} />
               ) : (
@@ -128,9 +134,8 @@ function App() {
               )
             }
           />
-          <Route
-            path="/my-services"
-            element={
+
+          <Route path="/my-services" element={
               token ? (
                 <MyServices token={token} />
               ) : (
@@ -139,20 +144,7 @@ function App() {
             }
           />
 
-          <Route
-            path="/my-services/:id"
-            element={
-              token ? (
-                <MyServices token={token} />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
-
-          <Route
-            path="/edit-service/:id"
-            element={
+          <Route path="/edit-service/:id" element={
               token ? (
                 <EditService token={token} />
               ) : (
@@ -160,9 +152,7 @@ function App() {
               )
             }
           />
-          <Route
-            path="/applied-services"
-            element={
+          <Route path="/applied-services" element={
               token ? (
                 <AppliedServices token={token} userId={userId}/>
               ) : (
@@ -171,9 +161,7 @@ function App() {
             }
           />
 
-          <Route
-            path="/account"
-            element={
+          <Route path="/account" element={
               token ? (
                 <Account token={token} />
               ) : (
@@ -181,9 +169,8 @@ function App() {
               )
             }
           />
-          <Route
-            path="/notifications"
-            element={
+
+          <Route path="/notifications" element={
               token ? (
                 <Notification token={token} />
               ) : (
@@ -191,9 +178,8 @@ function App() {
               )
             }
           />
-          <Route
-            path="/transactions"
-            element={
+
+          <Route path="/transactions" element={
               token ? (
                 <Transactions token={token} />
               ) : (
@@ -202,9 +188,7 @@ function App() {
             }
           />
 
-          <Route
-            path="/applicant/:id"
-            element={
+          <Route path="/applicant/:id" element={
               token ? (
                 <ApplicantProfile token={token} />
               ) : (
@@ -214,10 +198,22 @@ function App() {
           />
 
           {/* for admin */}
-            <Route path="/admin" element={<AdminLogin/>}></Route>
-            <Route path="/admin/dashboard" element={<AdminDashboard/>}></Route>
+            <Route path="/adminLogin" element={<AdminLogin/>}></Route>
 
-          {/* Catch-all */}
+            <Route path="/admin" element={<AdminProtectedRoute/>}>
+            <Route element={<AdminLayout/>}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="users" element={<AllUsers/>} />
+              <Route path="services" element={<AllServices/>} />
+              <Route path="transactions" element={<AllTransactions/>} />
+              <Route path="reports" element={<AllReports/>} />
+              <Route path="broadcast" element={<BroadcastNotification/>} />
+              <Route path="contacts" element={<AllContacts/>} />
+            </Route>
+          </Route>
+
+
+          {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
