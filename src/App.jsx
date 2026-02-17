@@ -36,7 +36,6 @@ import AllReports from "./pages/admin/AllReports";
 import AllContacts from "./pages/admin/AllContacts";
 import BroadcastNotification from "./pages/admin/BroadcastNotification";
 import AllTransactions from "./pages/admin/AllTransactions";
-
 function ScrollToTop() {
   const { pathname } = useLocation();
 
