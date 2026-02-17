@@ -31,11 +31,11 @@ import AllUsers from "./pages/admin/AllUsers";
 import AdminProtectedRoute from "./components/admin/AdminProtectedRoute";
 import AdminLayout from "./admin/AdminLayout";
 import AllServices from "./pages/admin/AllServices";
-import AllTransactions from "./pages/admin/AllTransactions";
 import ReportIssue from "./components/ReportIssue";
 import AllReports from "./pages/admin/AllReports";
 import AllContacts from "./pages/admin/AllContacts";
 import BroadcastNotification from "./pages/admin/BroadcastNotification";
+import AllTransactions from "./pages/admin/AllTransactions";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
