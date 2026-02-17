@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import defaultavatar from "../assets/default-profile.webp";
 import io from "socket.io-client";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -202,7 +201,7 @@ export default function Profile({ token }) {
             onClick={() => navigate("/account")}
           >
             <img
-              src={user?.profilePhoto || defaultavatar}
+              src={user?.profilePhoto || "https://ui-avatars.com/api/?name=" + user.firstName.slice(0,1) + user.lastName.slice(0,1)}
               alt="Profile"
               className="w-16 h-16 rounded-full border-2 border-blue-600 object-cover"
             />
@@ -328,7 +327,7 @@ export default function Profile({ token }) {
                     <p className="text-gray-700">{r.comment}</p>
                     <div className="flex items-center space-x-1 mb-2">
                       <img
-                        src={r.profilePhoto || defaultavatar}
+                        src={r.profilePhoto || "https://ui-avatars.com/api/?name=" + r.createdBy}
                         alt="Reviewer"
                         className="w-4 h-4 rounded-full object-cover"
                       />
@@ -437,27 +436,6 @@ export default function Profile({ token }) {
                     Next
                   </button>
                 </div>
-                //   <div className="flex justify-center items-center gap-4 mt-4">
-                //     <button
-                //       onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                //       disabled={currentPage === 1}
-                //       className="px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 disabled:opacity-50"
-                //     >
-                //       Previous
-                //   </button>
-
-                //   <span className="text-sm text-gray-700">
-                //     Page {currentPage} of {totalPages}
-                //   </span>
-
-                //   <button
-                //     onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                //     disabled={currentPage === totalPages}
-                //     className="px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 disabled:opacity-50"
-                //   >
-                //     Next
-                //   </button>
-                // </div>
               )}
             </>
           ) : (

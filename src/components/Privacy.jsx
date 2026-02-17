@@ -194,7 +194,7 @@ export default function Privacy() {
 
                 <div className="flex gap-2">
                   <a href="/delete-account" className="text-sm px-3 py-2 bg-red-50 text-red-600 rounded">Request Deletion</a>
-                  <a href="/contact" className="text-sm px-3 py-2 bg-blue-600 text-white rounded">Report an Issue</a>
+                  <a href="/report" className="text-sm px-3 py-2 bg-blue-600 text-white rounded">Report an Issue</a>
                 </div>
               </div>
 

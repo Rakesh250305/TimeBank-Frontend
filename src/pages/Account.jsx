@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Dialog } from "@headlessui/react";
-import defaultAvatar from "../assets/default-profile.webp";
 import { FaArrowLeft, FaRegEdit } from "react-icons/fa";
 import { showCustomToast } from "../utils/toast";
 import { RiArrowGoBackLine } from "react-icons/ri";
@@ -185,7 +184,7 @@ export default function Account({ token }) {
         <div className="flex items-center justify-center mb-6 relative">
           <img
             onClick={() => setPhotoPreviewOpen(true)}
-            src={user.profilePhoto || defaultAvatar}
+            src={user.profilePhoto || "https://ui-avatars.com/api/?name=" + user.firstName.slice(0,1) + user.lastName.slice(0,1)}
             alt="Profile"
             className="h-[10rem] w-[10rem] rounded-full border-3 border-blue-600 p-0.5 object-cover"
           />

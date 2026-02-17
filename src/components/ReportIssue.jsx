@@ -6,11 +6,12 @@ import {
 } from "react-icons/fa";
 import { showCustomToast } from "../utils/toast";
 
-export default function DeleteAccount() {
-   const apiUrl = import.meta.env.VITE_BACKEND_URL;
+export default function ReportIssue() {
+  const apiUrl = import.meta.env.VITE_BACKEND_URL;
   const [submitted, setSubmitted] = useState(false);
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [file, setFile] = useState(null);
   const [emailExists, setEmailExists] = useState(null); // null | true | false
 
   // LIVE EMAIL CHECK
@@ -18,11 +19,11 @@ export default function DeleteAccount() {
     try {
       const res = await fetch(
         `${apiUrl}/api/user/check-email`,
-         {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: emailValue }),
-      });
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: emailValue }),
+        });
 
       const data = await res.json();
       setEmailExists(data.exists);
@@ -43,32 +44,39 @@ export default function DeleteAccount() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!emailExists) {
+      showCustomToast("error", "Invalid Email", "User not found");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("email", email);
-    formData.append("message", message);
+    formData.append("reason", message);
+    if (file) formData.append("proof", file);
 
     try {
-      const res = await fetch(
-        `${apiUrl}/api/report/sendAccountDeletion`,
-        {
+      const res = await fetch(`${apiUrl}/api/report/sendReportAccount`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, message }),
+        body: formData, 
       });
 
       const data = await res.json();
 
       if (res.ok) {
         setSubmitted(true);
-        showCustomToast("success", "Request submitted", "We will review soon");
+        showCustomToast("success", "Report Submitted", "Admin will review it");
+        setEmail("");
+        setMessage("");
+        setFile(null);
       } else {
-        showCustomToast("error", "❌ Error", data.message || "Failed");
+        showCustomToast("error", "Failed", data.message || "Error");
       }
     } catch (error) {
-      showCustomToast("warning", "❌ Failed to submit request", "Server error");
       console.error(error);
+      showCustomToast("error", "Server Error", "Please try later");
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gray-50 py-16 px-6">
@@ -76,19 +84,19 @@ export default function DeleteAccount() {
 
         <div className="flex items-center gap-3 mb-6">
           <FaUserTimes className="text-red-600 text-3xl" />
-          <h1 className="text-2xl font-bold text-gray-800">Request Account Deletion</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Report Account </h1>
         </div>
 
         {!submitted ? (
           <>
             <p className="text-gray-600 text-sm mb-6">
-              Deleting your account will permanently remove your data.
+              Reporting any account will be done on valid proof and permanently remove the account.
             </p>
 
             <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
               <div className="flex gap-3 items-start">
                 <FaShieldAlt className="text-red-600 text-xl" />
-                <p className="text-sm text-red-700">Identity verification is required for deletion.</p>
+                <p className="text-sm text-red-700">Valid Proof is required for deletion.</p>
               </div>
             </div>
 
@@ -97,7 +105,7 @@ export default function DeleteAccount() {
               {/* EMAIL */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Registered Email
+                  Registered User Email
                 </label>
                 <input
                   className="w-full border rounded-lg px-4 py-2 text-sm"
@@ -122,30 +130,41 @@ export default function DeleteAccount() {
                 <label className="block text-sm font-medium text-gray-700">
                   Reason
                 </label>
-                <select 
+                <select
                   className="w-full border rounded-lg px-4 py-2 text-sm"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   required>
-                    <option>Reason for Deletion</option>
-                    <option value="Found a better alternative">Found a better alternative</option>
-                    <option value="Lack of useful services">Lack of useful services</option>
-                    <option value="take a break">Take a break</option>
-                    <option value="Privacy Concerns">Privacy Concerns</option>
-                    <option value="No Longer Needed">No Longer Needed</option>
-                    <option value="Other">Other</option>
-                  </select>
-                {/* <input
-                  className="w-full border rounded-lg px-4 py-2 text-sm"
-                  type="text"
-                  placeholder="Reason for deletion"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  required
-                /> */}
+                  <option>Reason for Deletion</option>
+                  <option value="Hate speech or symbols">Hate speech or symbols</option>
+                  <option value="Scam or Fraud">Scam or Fraud</option>
+                  <option value="Voilence or dangerous">Voilence or dangerous</option>
+                  <option value="Bullying or harassment">Bullying or harassment</option>
+                  <option value="spam">spam</option>
+                  <option value="other">Other</option>
+                </select>
+                {message === "other" && (
+                  <textarea
+                    className="w-full border rounded-lg px-4 py-2 text-sm mt-2"
+                    placeholder="Please specify your reason"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    required
+                  />
+                )}
               </div>
 
-         
+              {/* FILE */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Upload Valid Proof
+                </label>
+                <input
+                  type="file"
+                  className="w-full border rounded-lg px-4 py-2 text-sm"
+                  onChange={(e) => setFile(e.target.files[0])}
+                />
+              </div>
 
               {/* SUBMIT BUTTON */}
               <button
@@ -155,7 +174,7 @@ export default function DeleteAccount() {
                   ${emailExists ? "bg-red-600 hover:bg-red-700" : "bg-gray-400 cursor-not-allowed"}`}
               >
                 <FaPaperPlane />
-                Submit Delete Request
+                Submit Report
               </button>
 
             </form>
@@ -169,7 +188,7 @@ export default function DeleteAccount() {
         )}
 
         <p className="text-xs text-gray-500 text-center mt-6">
-          You can request data deletion anytime under privacy laws.
+          You can report any user with a valid proof anytime under privacy laws.
         </p>
       </div>
     </div>

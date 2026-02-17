@@ -37,12 +37,21 @@ export default function Transactions({ token }) {
               <li key={tx._id} className="flex justify-between py-3">
                 <div>
                   <p className="font-medium">
-                    {tx.type === "earn" ? "✅ Earned" : "💸 Spent"} {tx.amount} credits
+                    {tx.type === "earn" ? " Earned" : " Spent"} {tx.amount} credits
                   </p>
                   <p className="text-sm text-gray-500">{tx.description}</p>
                 </div>
-                <span className="text-sm text-gray-400">
+                <span className=" align-self-end text-right font-bold">
+                 {tx.type === "earn" ? 
+                  <p className="text-green-500">+ {tx.amount} Earned</p>
+                  : 
+                  <p className="text-red-500">- {tx.amount} Spent</p>
+                  } 
+               
+                 <p className="text-sm text-gray-400">
                   {new Date(tx.createdAt).toLocaleString()}
+                 </p>
+                  
                 </span>
               </li>
             ))}
