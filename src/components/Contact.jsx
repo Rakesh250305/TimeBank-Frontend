@@ -74,8 +74,9 @@ export default function Contact() {
         </div>
       </header>
 
-      {/* Contact Cards */}
-      <main className="py-16 px-6 md:px-14 bg-gray-50 flex flex-col items-center gap-10">
+        {/* Content main */}
+        <main className="max-w-6xl mx-auto px-6 py-10 space-y-10">
+        {/* CONTACT CARDS */}
         <div className="grid md:grid-cols-3 gap-8 w-full max-w-5xl">
           {[
             { icon: <FaEnvelope />, text: "support@timebank.com" },
@@ -84,71 +85,78 @@ export default function Contact() {
           ].map((item, i) => (
             <div
               key={i}
-              className="bg-white rounded-xl shadow-lg p-8 flex flex-col items-center gap-4"
-              whileHover={{ scale: 1.07 }}
-              transition={{ type: "spring", stiffness: 150 }}
+              className="bg-white p-8 rounded-xl shadow-lg flex flex-col items-center border hover:shadow-lg transition"
             >
-              <span className="text-blue-600 text-4xl">{item.icon}</span>
-              <p className="text-gray-700 text-lg font-medium">{item.text}</p>
+              <div className="text-blue-600 text-3xl mb-3">
+                {item.icon}
+              </div>
+              <p className="text-sm text-gray-700">{item.text}</p>
             </div>
           ))}
         </div>
-        {/* Social Links */}
-        <h1 className="text-blue-600 font-bold text-2xl">Follow us on</h1>
-        <div className="flex gap-6 text-3xl text-blue-600">
-          <FaFacebook className="cursor-pointer hover:text-blue-800" />
-          <FaLinkedin className="cursor-pointer hover:text-blue-800" />
-          <FaInstagram className="cursor-pointer hover:text-pink-600" />
-          <FaWhatsapp className="cursor-pointer hover:text-green-500" />
-        </div>
 
-        {/* Contact Form */}
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white p-10 rounded-xl shadow-xl w-full max-w-2xl space-y-6"
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <h2 className="text-3xl font-bold text-center text-blue-600">
-            Get in Touch
-          </h2>
+        {/* FORM + SOCIAL */}
+        <div className="grid md:grid-cols-2 gap-8">
 
-          <input
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            placeholder="Your Name"
-            required
-            className="w-full p-3 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none"
-          />
-
-          <input
-            name="email"
-            type="email"
-            value={form.email}
-            onChange={handleChange}
-            placeholder="Your Email"
-            required
-            className="w-full p-3 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none"
-          />
-
-          <textarea
-            name="message"
-            value={form.message}
-            onChange={handleChange}
-            placeholder="Your Message"
-            rows="4"
-            required
-            className="w-full p-3 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none"
-          />
-
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-all"
+          {/* FORM */}
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white p-8 rounded-xl shadow space-y-4"
           >
-            Submit Message
-          </button>
-        </form>
+            <h2 className="text-xl font-semibold text-blue-600">
+              Send Message
+            </h2>
+
+            <input
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              placeholder="Name"
+              className="w-full p-3 border rounded-lg"
+              required
+            />
+
+            <input
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="Email"
+              className="w-full p-3 border rounded-lg"
+              required
+            />
+
+            <textarea
+              name="message"
+              value={form.message}
+              onChange={handleChange}
+              placeholder="Message"
+              className="w-full p-3 border rounded-lg"
+              required
+            />
+
+            <button className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700">
+              Send Message
+            </button>
+          </form>
+
+          {/* SOCIAL */}
+          <div className="bg-white p-8 rounded-xl shadow flex flex-col justify-center">
+            <h2 className="text-xl font-semibold text-blue-600 mb-4">
+              Follow Us
+            </h2>
+
+            <div className="flex gap-4 text-2xl text-blue-600">
+              <FaFacebook className="hover:text-blue-800 cursor-pointer" />
+              <FaLinkedin className="hover:text-blue-800 cursor-pointer" />
+              <FaInstagram className="hover:text-pink-500 cursor-pointer" />
+              <FaWhatsapp className="hover:text-green-500 cursor-pointer" />
+            </div>
+
+            <p className="text-sm text-gray-600 mt-4">
+              Stay connected with our community updates.
+            </p>
+          </div>
+        </div>
 
         {/* Google Map */}
         {/* Map Heading */}

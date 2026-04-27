@@ -5,11 +5,56 @@ import {
   FaGlobe,
   FaHandshake,
   FaClock,
+  FaWhatsapp,
+  FaHourglassHalf,
+  FaGraduationCap,
+  FaStar,
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import { FaLinkedin, FaGithub, FaTwitter } from "react-icons/fa";
 import CtaSection from "../components/CtaSection.jsx";
+import RakeshProfile from '../assets/Profile/Rakesh Raikwar.jpg'
+import AboutImage from '../assets/about-page.png';
+
+const features = [
+  {
+    icon: <FaUsers />,
+    color: "#185FA5", bg: "#E6F1FB",
+    title: "Community Driven",
+    desc: "Members help & learn together",
+  },
+  {
+    icon: <FaHourglassHalf />,
+    color: "#0F6E56", bg: "#E1F5EE",
+    title: "Time-Credit System",
+    desc: "Earn 1 credit per hour shared",
+  },
+  {
+    icon: <FaGraduationCap />,
+    color: "#534AB7", bg: "#EEEDFE",
+    title: "Skill Exchange",
+    desc: "Learn anything from anyone",
+  },
+  {
+    icon: <FaGlobe />,
+    color: "#3B6D11", bg: "#EAF3DE",
+    title: "Inclusive Culture",
+    desc: "Anyone can join & contribute",
+  },
+  {
+    icon: <FaHandshake />,
+    color: "#993C1D", bg: "#FAECE7",
+    title: "Trust-Based",
+    desc: "Fair & respectful interactions",
+  },
+  {
+    icon: <FaStar />,
+    color: "#993556", bg: "#FBEAF0",
+    title: "Easy to Use",
+    desc: "User friendly interface to navigate",
+  },
+];
 
 export default function About() {
   useEffect(() => {
@@ -51,9 +96,9 @@ export default function About() {
       </header>
 
       {/* Who We Are */}
-      <main className="pt-20 bg-gray-50">
+      <main className="pt-20 bg-gray-50 px-5">
         <section className="pb-10 bg-white">
-          <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20 grid lg:grid-cols-2 gap-12 items-center">
+          <div className="max-w-7xl mx-auto md:px-12 lg:px-20 grid lg:grid-cols-2 gap-12 items-center">
             {/* Left Text Section */}
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-blue-600 mb-6">
@@ -77,7 +122,7 @@ export default function About() {
             {/* Right Image Section */}
             <div className="flex justify-center">
               <img
-                src="https://cdn-icons-png.flaticon.com/512/3065/3065416.png"
+                src={AboutImage}
                 alt="Community Illustration"
                 className="w-full max-w-sm md:max-w-md drop-shadow-lg rounded-xl"
               />
@@ -86,12 +131,12 @@ export default function About() {
         </section>
 
         {/* Mission & Values */}
-        <section className="mb-20">
+        <section className="mb-20 max-w-6xl mx-auto py-5">
           <h2 className="text-3xl md:text-4xl font-bold text-blue-600 text-center mb-14">
             Our Mission & Values
           </h2>
 
-          <div className="grid md:grid-cols-3 gap-10 max-w-5xl mx-auto">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
                 icon: <FaUsers />,
@@ -111,20 +156,22 @@ export default function About() {
             ].map((item, i) => (
               <div
                 key={i}
-                className="bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-2"
+                className="bg-white p-6 rounded-xl shadow hover:shadow-lg border border-gray-100 transition text-center hover:-translate-y-1"
               >
-                <div className="text-blue-600 text-4xl mb-4 mx-auto">
+                <div
+                  className="w-14 h-14 flex items-center justify-center mx-auto mb-3 text-3xl text-blue-600"
+                >
                   {item.icon}
                 </div>
-                <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-                <p className="text-gray-600">{item.text}</p>
+                <h4 className="font-semibold text-blue-600">{item.title}</h4>
+                <p className="text-gray-600 text-sm mt-1">{item.text}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* Stats */}
-        <section className="py-20 md:px-20 text-center text-gray-800 overflow-hidden">
+        <section className="py-10 md:px-20 text-center text-gray-800 overflow-hidden">
           <div>
             <div>
               <h2 className="text-3xl font-bold text-blue-600 mb-6">
@@ -159,8 +206,8 @@ export default function About() {
         </section>
 
         {/* Team & Work Style */}
-        <section className="py-20 bg-gray-50  transition">
-          <div className="max-w-7xl mx-auto px-6 md:px-12">
+        <section className="py-20 bg-gray-50 transition">
+          <div className="max-w-7xl  mx-auto md:px-12">
             <h2 className="text-3xl md:text-4xl font-bold text-blue-600 text-center mb-12">
               Meet Our Team
             </h2>
@@ -170,10 +217,10 @@ export default function About() {
                 {
                   name: "Rakesh Raikwar",
                   role: "Founder & Full-Stack Developer",
-                  img: "https://i.pravatar.cc/200?img=12",
-                  linkedin: "#",
-                  github: "#",
-                  twitter: "#",
+                  img: RakeshProfile,
+                  linkedin: "https://www.linkedin.com/in/rakesh0325",
+                  github: "https://github.com/rakesh250305",
+                  whatsapp: "https://wa.me/7879245448",
                 },
                 // {
                 //   name: "Priya Sharma",
@@ -202,7 +249,7 @@ export default function About() {
               ].map((member, i) => (
                 <div
                   key={i}
-                  className="bg-white w-[75rem] rounded-2xl p-6 shadow-md hover:shadow-xl hover:-translate-y-2 border border-gray-100 transition group text-center"
+                  className="bg-white lg:w-[75rem] rounded-2xl p-6 shadow-md hover:shadow-xl hover:-translate-y-2 border border-gray-100 transition group text-center"
                 >
                   <img
                     src={member.img}
@@ -228,10 +275,10 @@ export default function About() {
                       <FaGithub />
                     </a>
                     <a
-                      href={member.twitter}
+                      href={member.whatsapp}
                       className="hover:text-blue-400 transition"
                     >
-                      <FaTwitter />
+                      <FaWhatsapp />
                     </a>
                   </div>
                 </div>
@@ -239,43 +286,22 @@ export default function About() {
             </div>
 
             {/* How We Work */}
-            <h3 className="text-2xl font-bold text-center text-gray-800  mb-10">
+            <h3 className="text-2xl font-bold text-center text-blue-600  mb-10">
               How We Work
             </h3>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[
-                {
-                  icon: "📌",
-                  title: "Community Driven",
-                  desc: "Members help & learn together",
-                },
-                {
-                  icon: "⏳",
-                  title: "Time-Credit System",
-                  desc: "Earn 1 credit per hour shared",
-                },
-                {
-                  icon: "🎓",
-                  title: "Skill Exchange",
-                  desc: "Learn anything from anyone",
-                },
-                {
-                  icon: "🌍",
-                  title: "Inclusive Culture",
-                  desc: "Anyone can join & contribute",
-                },
-                {
-                  icon: "🤝",
-                  title: "Trust-Based",
-                  desc: "Fair & respectful interactions",
-                },
-              ].map((item, i) => (
+              {features.map((item, i) => (
                 <div
                   key={i}
                   className="bg-white p-6 rounded-xl shadow hover:shadow-lg border border-gray-100 transition text-center hover:-translate-y-1"
                 >
-                  <div className="text-4xl mb-2">{item.icon}</div>
+                  <div
+                    className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3 text-xl"
+                    style={{ background: item.bg, color: item.color }}
+                  >
+                    {item.icon}
+                  </div>
                   <h4 className="font-semibold text-blue-600">{item.title}</h4>
                   <p className="text-gray-600 text-sm mt-1">{item.desc}</p>
                 </div>

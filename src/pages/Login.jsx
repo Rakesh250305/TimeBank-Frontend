@@ -14,6 +14,7 @@ export default function Login({ setToken }) {
   const [suspend, setSuspend] = useState(false);
   const [reason, setReason] = useState("");
 
+  const [msg, setmsg] = useState("");
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -131,11 +132,20 @@ export default function Login({ setToken }) {
                 </a>
                 .
               </p>
-              <button className="flex items-center justify-center gap-3 bg-gray-900 border-gray-700 border text-white p-3 rounded-lg hover:bg-gray-700 transition">
+              <button 
+                className="flex items-center justify-center gap-3 bg-gray-900 border-gray-700 border text-white p-3 rounded-lg hover:bg-gray-700 transition" 
+                onClick={()=>{
+                  alert("New Feature Comming Soon!")
+                }}
+              >
                 <img src={googleLogo} alt="Google" className="w-5 h-5" />
                 <p className="text-sm">Continue with Google</p>
               </button>
-              <button className="flex items-center justify-center gap-3 bg-gray-900 border-gray-700 border text-white p-3 rounded-lg hover:bg-gray-700 transition">
+              <button 
+                className="flex items-center justify-center gap-3 bg-gray-900 border-gray-700 border text-white p-3 rounded-lg hover:bg-gray-700 transition"
+                onClick={()=>{
+                  alert("New Feature Comming Soon!")
+                }}>
                 <img src={microsoftLogo} alt="Microsoft" className="w-5 h-5" />
                 <p className="text-sm">Continue with Microsoft</p>
               </button>

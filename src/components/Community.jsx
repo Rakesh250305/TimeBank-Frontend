@@ -1,10 +1,50 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import Footer from "./Footer";
-import { FaUsers, FaHandsHelping, FaNetworkWired } from "react-icons/fa";
+import {
+  FaUsers,
+  FaHandsHelping,
+  FaNetworkWired,
+  FaChalkboardTeacher,
+  FaAward,
+  FaGlobe,
+} from "react-icons/fa";
 import CtaSection from "./CtaSection";
 
 export default function Community() {
+  const benefits = [
+    {
+      title: "Learn Anything",
+      desc: "Explore hundreds of skills — from coding to cooking to finance — at zero cost.",
+      icon: <FaChalkboardTeacher />,
+    },
+    {
+      title: "Teach & Earn",
+      desc: "Share what you know, help others grow, and earn time credits for every hour.",
+      icon: <FaHandsHelping />,
+    },
+    {
+      title: "Build Real Connections",
+      desc: "Grow meaningful relationships with mentors, learners, and professionals.",
+      icon: <FaNetworkWired />,
+    },
+    {
+      title: "Showcase Your Skills",
+      desc: "Profile badges, verified skills & community rankings help you stand out.",
+      icon: <FaAward />,
+    },
+    {
+      title: "Inclusive for Everyone",
+      desc: "Students, professionals, hobbyists — all are welcome to join and learn.",
+      icon: <FaUsers />,
+    },
+    {
+      title: "No Money Required",
+      desc: "A learning ecosystem based on time, respect, and collaboration — not money.",
+      icon: <FaGlobe />,
+    },
+  ];
+
   return (
     <div className="flex flex-col min-h-screen font-sans">
       <header className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-12 text-center">
@@ -17,7 +57,7 @@ export default function Community() {
         </p>
       </header>
 
-      <main className="py-24 px-6 md:px-16 text-center bg-gray-50">
+      <main className="lg:py-10 pb-24 px-5 md:px-16 text-center bg-gray-50">
         <section className="py-20 bg-white">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-blue-600">
@@ -29,37 +69,17 @@ export default function Community() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto px-6">
-            {[
-              {
-                title: "Learn Anything",
-                desc: "Explore hundreds of skills — from coding to cooking to finance — at zero cost.",
-              },
-              {
-                title: "Teach & Earn",
-                desc: "Share what you know, help others grow, and earn time credits for every hour.",
-              },
-              {
-                title: "Build Real Connections",
-                desc: "Grow meaningful relationships with mentors, learners, and professionals.",
-              },
-              {
-                title: "Showcase Your Skills",
-                desc: "Profile badges, verified skills & community rankings help you stand out.",
-              },
-              {
-                title: "Inclusive for Everyone",
-                desc: "Students, professionals, hobbyists — all are welcome to join and learn.",
-              },
-              {
-                title: "No Money Required",
-                desc: "A learning ecosystem based on time, respect, and collaboration — not money.",
-              },
-            ].map((b, i) => (
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {benefits.map((b, i) => (
               <div
                 key={i}
-                className="bg-gray-50 p-8 rounded-xl shadow hover:shadow-lg transition hover:-translate-y-2"
+                className="bg-gray-50 p-8 rounded-xl shadow hover:shadow-lg transition hover:-translate-y-2 text-center"
               >
+                {/* ICON */}
+                <div className="text-4xl text-blue-600 mb-4 flex justify-center">
+                  {b.icon}
+                </div>
+
                 <h3 className="text-xl font-semibold text-blue-600 mb-2">
                   {b.title}
                 </h3>

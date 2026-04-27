@@ -107,7 +107,7 @@ export default function ApplicantProfile({ token }) {
     <div className="min-h-screen bg-gray-100">
       <Navbar token={token} />
 
-      <div className="p-6 min-h-screen w-full mx-auto">
+      <div className="p-6 min-h-screen max-w-7xl mx-auto">
         <div className="mt-32 bg-white rounded-2xl shadow-xl p-8 relative">
           {/* Profile Picture */}
           <div className="absolute -top-16 left-1/2 -translate-x-1/2">

@@ -1,83 +1,115 @@
 import Footer from "./Footer";
-import { FaBalanceScale, FaGavel } from "react-icons/fa";
+import {
+  FaBalanceScale,
+  FaGavel,
+  FaUserShield,
+  FaExclamationTriangle,
+  FaFileContract,
+  FaSyncAlt,
+  FaPrint,
+} from "react-icons/fa";
 
 export default function Terms() {
+  const printPage = () => window.print();
+
+  const sections = [
+    {
+      title: "Acceptance of Terms",
+      icon: <FaFileContract />,
+      content:
+        "By creating an account or using TimeBank, you agree to these Terms. If you do not agree, please do not use the platform.",
+    },
+    {
+      title: "User Responsibilities",
+      icon: <FaUserShield />,
+      list: [
+        "Provide accurate information",
+        "Use the platform respectfully",
+        "Follow community rules & laws",
+      ],
+    },
+    {
+      title: "Prohibited Activities",
+      icon: <FaExclamationTriangle />,
+      list: [
+        "Fraud, harassment, illegal actions",
+        "Hacking or misuse",
+        "Exploiting members",
+      ],
+    },
+    {
+      title: "Account Termination",
+      icon: <FaGavel />,
+      content:
+        "Accounts violating policies may be suspended or removed to protect the community.",
+    },
+    {
+      title: "Changes to Terms",
+      icon: <FaSyncAlt />,
+      content:
+        "We may update these Terms. Continued usage means acceptance.",
+    },
+  ];
+
   return (
-    <div className="flex flex-col min-h-screen font-sans">
-      <header className="bg-indigo-600 text-white py-12 text-center shadow-lg">
-        <h1 className="text-3xl md:text-4xl font-bold flex items-center justify-center gap-3">
-          <FaBalanceScale className="text-white text-4xl" /> Terms & Conditions
-        </h1>
-        <p className="max-w-2xl mx-auto text-lg opacity-90">
-          Please read these terms before using TimeBank.
-        </p>
+    <div className="min-h-screen bg-gray-50">
+      
+      {/* HEADER */}
+      <header className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-12 shadow-md">
+        <div className="max-w-6xl mx-auto px-6 flex items-center gap-4">
+          <FaBalanceScale className="text-4xl" />
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold">
+              Terms & Conditions
+            </h1>
+            <p className="text-sm opacity-90">
+              Last updated: 2025 — Clear and fair usage rules.
+            </p>
+          </div>
+        </div>
       </header>
 
-      <main className="py-16 px-6 md:px-16 bg-gray-50 max-w-5xl mx-auto space-y-12 text-gray-700">
-        
-        <section id="acceptance">
-          <h2 className="text-2xl font-bold text-indigo-700">1. Acceptance of Terms</h2>
-          <p>
-            By creating an account or using TimeBank, you agree to these Terms. 
-            If you do not agree, please do not use the platform.
-          </p>
-        </section>
+      {/* CONTENT */}
+      <main className="max-w-6xl mx-auto px-6 py-10 space-y-6">
+        {sections.map((sec, i) => (
+          <div
+            key={i}
+            className="bg-white p-6 rounded-xl shadow border"
+          >
+            <h2 className="text-lg font-semibold text-blue-700 flex items-center gap-2">
+              {sec.icon} {i + 1}. {sec.title}
+            </h2>
 
-        <section id="responsibilities">
-          <h2 className="text-2xl font-bold text-indigo-700">2. User Responsibilities</h2>
-          <ul className="list-disc pl-6 space-y-2">
-            <li>Provide accurate information</li>
-            <li>Use the platform respectfully</li>
-            <li>Follow community rules & laws</li>
-          </ul>
-        </section>
+            {sec.content && (
+              <p className="mt-3 text-sm text-gray-700">
+                {sec.content}
+              </p>
+            )}
 
-        <section id="prohibited">
-          <h2 className="text-2xl font-bold text-indigo-700">3. Prohibited Activities</h2>
-          <p>Users must not:</p>
-          <ul className="list-disc pl-6 space-y-2">
-            <li>Engage in fraud, harassment, or illegal behavior</li>
-            <li>Misuse or hack the platform</li>
-            <li>Exploit community members</li>
-          </ul>
-        </section>
+            {sec.list && (
+              <ul className="mt-3 text-sm list-disc pl-6 space-y-1 text-gray-700">
+                {sec.list.map((item, idx) => (
+                  <li key={idx}>{item}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ))}
 
-        <section id="termination">
-          <h2 className="text-2xl font-bold text-indigo-700">4. Account Termination</h2>
-          <p>
-            We may suspend or delete accounts involved in misconduct, 
-            fraud, or harmful activity to protect the community.
-          </p>
-        </section>
+        {/* TRUST BADGE */}
+        <div className="bg-green-50 text-green-700 p-4 rounded-xl text-sm flex items-center gap-2">
+          ✔ Community-first policy — Fair, transparent, and secure.
+        </div>
 
-        <section id="ip">
-          <h2 className="text-2xl font-bold text-indigo-700">5. Intellectual Property</h2>
-          <p>
-            All branding, logos, and platform content belong to TimeBank 
-            and cannot be used without permission.
-          </p>
-        </section>
-
-        <section id="liability">
-          <h2 className="text-2xl font-bold text-indigo-700">6. Limitation of Liability</h2>
-          <p>
-            TimeBank provides a community tool. We are not responsible 
-            for user interactions offline or outcomes from skill exchanges.
-          </p>
-        </section>
-
-        <section id="changes">
-          <h2 className="text-2xl font-bold text-indigo-700">7. Changes to Terms</h2>
-          <p>We may update these Terms. Continued use means acceptance.</p>
-        </section>
-
-        <section id="contact">
-          <h2 className="text-2xl font-bold text-indigo-700 flex items-center gap-2">
-            <FaGavel /> Contact
-          </h2>
-          <p>For legal inquiries: <span className="text-indigo-700 font-semibold">legal@timebank.com</span></p>
-        </section>
+        {/* CONTACT */}
+        <div className="bg-blue-600 text-white p-6 rounded-xl text-center">
+          <h3 className="text-lg font-semibold flex justify-center gap-2">
+            <FaGavel /> Legal Contact
+          </h3>
+          <p className="mt-2 text-sm">legal@timebank.com</p>
+        </div>
       </main>
+
       <Footer />
     </div>
   );
