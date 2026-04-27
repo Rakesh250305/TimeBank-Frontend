@@ -5,7 +5,8 @@ import { FaLaptopCode, FaHandsHelping, FaUsers, FaGlobe } from "react-icons/fa";
 import { MdCurrencyExchange } from "react-icons/md";
 import { useEffect } from "react";
 import CtaSection from "../components/CtaSection";
-
+import RakeshProfile from '../assets/Profile/Rakesh Raikwar.jpg'
+ 
 export default function Home() {
   useEffect(() => {
     const parallax = document.getElementById("parallax-bg");
@@ -288,8 +289,8 @@ export default function Home() {
         <div className="flex justify-center gap-8">
           <div className="bg-blue-50 p-6 rounded-xl shadow hover:shadow-lg hover:-translate-y-2 transition">
             <img
-              src="https://i.pravatar.cc/120?img=12"
-              className="w-24 h-24 rounded-full mx-auto"
+              src={RakeshProfile}
+              className="w-24 h-24 rounded-full object-cover mx-auto"
             />
             <h4 className="font-semibold mt-3">Rakesh Raikwar</h4>
             <p className="text-xs text-gray-600">Founder • MERN Developer</p>

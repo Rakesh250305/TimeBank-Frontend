@@ -1,12 +1,65 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import io from "socket.io-client";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-const apiUrl = import.meta.env.VITE_BACKEND_URL;
+import { FaEdit } from "react-icons/fa";
 
+const apiUrl = import.meta.env.VITE_BACKEND_URL;
 const socket = io(`${apiUrl}`);
+
+const tabs = [
+  { id: "services", label: "Service Requests" },
+  { id: "reviews", label: "Reviews" },
+  { id: "experience", label: "Experience" },
+];
+
+const getStatusMeta = (status) => {
+  switch (status) {
+    case "processing":
+      return {
+        label: "Accepted",
+        classes: "bg-sky-100 text-sky-700 ring-1 ring-sky-200",
+      };
+    case "completed":
+      return {
+        label: "Completed",
+        classes: "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200",
+      };
+    case "rejected":
+      return {
+        label: "Reopened",
+        classes: "bg-rose-100 text-rose-700 ring-1 ring-rose-200",
+      };
+    case "requested":
+    case "open":
+    default:
+      return {
+        label: "Pending",
+        classes: "bg-amber-100 text-amber-700 ring-1 ring-amber-200",
+      };
+  }
+};
+
+const DetailRow = ({ label, value }) => (
+  <div className="flex items-start gap-3 text-sm text-slate-600">
+    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+      <span className="text-xs font-bold">{label.slice(0, 1)}</span>
+    </div>
+    <div>
+      <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{label}</p>
+      <p className="mt-0.5 text-sm font-medium text-slate-700">{value || "-"}</p>
+    </div>
+  </div>
+);
+
+const StatCard = ({ value, label }) => (
+  <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 text-center shadow-sm">
+    <p className="text-2xl font-bold text-slate-800">{value}</p>
+    <p className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-400">{label}</p>
+  </div>
+);
 
 export default function Profile({ token }) {
   const [user, setUser] = useState(null);
@@ -14,61 +67,55 @@ export default function Profile({ token }) {
   const [appliedServices, setAppliedServices] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [activeTab, setActiveTab] = useState("services");
   const reviewsPerPage = 3;
   const navigate = useNavigate();
 
-  // ✅ Fetch user profile
+  const fetchAppliedServices = async (userId) => {
+    try {
+      const res = await axios.get(`${apiUrl}/api/services/applied`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const myApplied = res.data.filter((service) =>
+  service.applicants?.some(
+    (app) => String(app.user) === String(userId)
+  )
+);
+
+      setAppliedServices(myApplied);
+      // console.log(myApplied);
+    } catch (err) {
+      console.error("Fetch applied services error:", err);
+    }
+  };
+
   const fetchProfile = async () => {
     try {
-      const res = await axios.get(
-        // "http://localhost:5000/api/user/profile",
-        `${apiUrl}/api/user/profile`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const res = await axios.get(`${apiUrl}/api/user/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       const userData = {
         ...res.data.data,
-        profilePhoto: res.data.data.profilePhoto
-          ? `${res.data.data.profilePhoto}`
-          : null,
+        profilePhoto: res.data.data.profilePhoto || null,
       };
+
       setReviews(userData.reviews || []);
       setUser({
         ...userData,
         requestedServices: res.data.requestedServices || [],
       });
 
-      // after profile is fetched, also fetch applied services
-      fetchAppliedServices(res.data._id);
+      fetchAppliedServices(userData._id || res.data._id);
     } catch (err) {
       console.error("Fetch profile error:", err);
     }
   };
 
-  // ✅ Fetch services I applied for
-  const fetchAppliedServices = async (userId) => {
-    try {
-      const res = await axios.get(
-        `${apiUrl}/api/services/applied`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      // filter services where I am the requester
-      const myApplied = res.data.filter(
-        (srv) => srv.requestedBy?._id === userId
-      );
-
-      setAppliedServices(myApplied);
-    } catch (err) {
-      console.error("Fetch applied services error:", err);
-    }
-  };
-
   const calculateProfileCompletion = () => {
     if (!user) return 0;
+
     const fields = [
       user.firstName,
       user.lastName,
@@ -83,49 +130,68 @@ export default function Profile({ token }) {
       user.bio,
       user.academics?.length,
       user.experiences?.length,
-      user.reviews?.length,
+      reviews?.length,
     ];
 
-    const filled = fields.filter((f) => f && f !== "").length;
-    const percentage = Math.round((filled / fields.length) * 100);
-    return percentage;
+    const filled = fields.filter((field) => field && field !== "").length;
+    return Math.round((filled / fields.length) * 100);
   };
 
   const profileCompletion = calculateProfileCompletion();
-
-  // Sort reviews by newest first
-  const sortedReviews = [...(reviews || [])].sort(
-    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-  );
-
-  // Pagination logic
-  const totalPages = Math.ceil(sortedReviews.length / reviewsPerPage);
-  const startIndex = (currentPage - 1) * reviewsPerPage;
-  const endIndex = startIndex + reviewsPerPage;
-  const paginatedReviews = sortedReviews.slice(startIndex, endIndex);
-
-  useEffect(
-    () => {
-      if (token) {
-        fetchProfile();
-      }
-      setCurrentPage(1);
-    },
-    [token],
+  const sortedReviews = useMemo(
+    () =>
+      [...(reviews || [])].sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      ),
     [reviews]
   );
+  const totalPages = Math.ceil(sortedReviews.length / reviewsPerPage);
+  const startIndex = (currentPage - 1) * reviewsPerPage;
+  const paginatedReviews = sortedReviews.slice(
+    startIndex,
+    startIndex + reviewsPerPage
+  );
+  const averageRating = reviews.length
+    ? (
+        reviews.reduce((sum, review) => sum + (Number(review.rating) || 0), 0) /
+        reviews.length
+      ).toFixed(1)
+    : "0.0";
 
-  //  Show congratulations popup if user just signed up
+  const addressLine = user?.address
+    ? [
+        user.address.street1,
+        user.address.street2,
+        user.address.city,
+        user.address.state,
+        user.address.country,
+      ]
+        .filter(Boolean)
+        .join(", ")
+    : "";
+
+  const heroImage =
+    "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1600&q=80";
+  const initials = `${user?.firstName?.[0] || "U"}${user?.lastName?.[0] || ""}`;
+  const experiences = user?.experiences || [];
+  const academics = user?.academics || [];
+  const skills = user?.skills || [];
+
+  console.log(academics);
+  useEffect(() => {
+    if (token) fetchProfile();
+  }, [token]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [reviews]);
+
   useEffect(() => {
     if (localStorage.getItem("firstLogin")) {
       setWelcome(true);
       localStorage.removeItem("firstLogin");
     }
   }, []);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [reviews]);
 
   useEffect(() => {
     if (!user?._id) return;
@@ -135,13 +201,21 @@ export default function Profile({ token }) {
     socket.on("notification", (notif) => {
       setUser((prev) => ({
         ...prev,
-        requestedServices: prev.requestedServices.map((s) =>
-          String(s._id) === String(notif.serviceId)
-            ? { ...s, status: notif.status }
-            : s
+        requestedServices: (prev?.requestedServices || []).map((service) =>
+          String(service._id) === String(notif.serviceId)
+            ? { ...service, status: notif.status }
+            : service
         ),
-        notifications: [notif, ...(prev.notifications || [])],
+        notifications: [notif, ...(prev?.notifications || [])],
       }));
+
+      setAppliedServices((prev) =>
+        prev.map((service) =>
+          String(service._id) === String(notif.serviceId)
+            ? { ...service, status: notif.status }
+            : service
+        )
+      );
     });
 
     return () => {
@@ -149,332 +223,502 @@ export default function Profile({ token }) {
     };
   }, [user?._id]);
 
-  if (!user)
+  if (!user) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-gray-900 z-50">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90">
         <div className="flex flex-col items-center">
-          <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24 mb-4"></div>
-          <p className="text-white text-lg">Loading, please wait...</p>
+          <div className="h-20 w-20 animate-spin rounded-full border-4 border-slate-300 border-t-sky-500" />
+          <p className="mt-4 text-lg font-medium text-white">Loading profile...</p>
         </div>
-
-        <style jsx>
-          {`
-            .loader {
-              border-top-color: #3b82f6;
-              animation: spin 1s linear infinite;
-            }
-            @keyframes spin {
-              0% {
-                transform: rotate(0deg);
-              }
-              100% {
-                transform: rotate(360deg);
-              }
-            }
-          `}
-        </style>
       </div>
     );
+  }
 
   return (
-    <div className="flex flex-col min-h-screen font-sans">
+    <div className="flex min-h-screen flex-col bg-[#f6f9fc] text-slate-800">
       <Navbar token={token} />
 
-      <div className="max-w-screen min-h-screen mt-20 md:mt-24 p-2">
-        {/* Profile Card */}
-        {/* Profile Completion Progress Bar */}
-        <div className="mt-0 md:mt-2 flex flex-col items-center mb-6">
-          <p className="text-sm text-gray-600 mb-1 mx-8">
-            Profile Completion:{" "}
-            <span className="font-semibold">{profileCompletion}%</span>
-          </p>
-          <div className="w-[80%] lg:w-[95%] bg-gray-200 rounded-full h-2">
+      <main className="flex-1 pt-20 md:pt-20">
+        <section className="mx-auto w-full px-4 pb-12 ">
+          <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_30px_80px_rgba(15,23,42,0.08)]">
             <div
-              className="bg-blue-500 h-2 rounded-full"
-              style={{ width: `${profileCompletion}%` }}
-            ></div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl shadow-md  p-8 relative">
-          <div
-            className="absolute top-6 right-6 cursor-pointer"
-            onClick={() => navigate("/account")}
-          >
-            <img
-              src={user?.profilePhoto || "https://ui-avatars.com/api/?name=" + user.firstName.slice(0,1) + user.lastName.slice(0,1)}
-              alt="Profile"
-              className="w-16 h-16 rounded-full border-2 border-blue-600 object-cover"
-            />
-          </div>
-          <h2 className="text-xl md:text-3xl font-bold text-blue-600 mb-2 md:mb-4">
-            Hello, {user?.firstName || "User"} {user?.lastName || ""}
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p className="text-gray-700">
-                <strong>Email:</strong> {user.email}
-              </p>
-              <p className="text-gray-700">
-                <strong>Location:</strong>{" "}
-                {user?.address
-                  ? [
-                      user.address.street1,
-                      user.address.street2,
-                      user.address.city,
-                      user.address.postalCode,
-                    ]
-                      .filter(Boolean)
-                      .join(", ")
-                  : "-"}
-              </p>
-              <p className="text-gray-700">
-                <strong>State:</strong> {user.address.state || "-"}
-              </p>
-              <p className="text-gray-700">
-                <strong>Country:</strong> {user.address.country || "-"}
-              </p>
-              <p className="text-gray-700">
-                <strong>Skills:</strong> {(user.skills || []).join(", ") || "-"}
-              </p>
-              <p className="text-gray-700">
-                <strong>Availability:</strong> {user.availability || "-"}
-              </p>
-              <p className="text-gray-700">
-                <strong>Total Credits:</strong> {user.wallet || "0"}
-              </p>
+              className="relative h-48 md:h-64"
+              style={{
+                backgroundImage: `linear-gradient(135deg, rgba(255,255,255,0.2), rgba(14,116,144,0.25)), url(${heroImage})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-t from-white via-white/45 to-white/10" />
             </div>
-          </div>
-        </div>
 
-        {/* ✅ My Service Requests */}
-        <div className="mt-8 bg-white p-6 rounded-xl shadow">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-bold text-blue-600">
-              My Service Requests
-            </h3>
-
-            {/* ✅ View All Button */}
-            {appliedServices.length > 3 && (
-              <button
-                onClick={() => navigate("/applied-services")}
-                className="text-sm text-blue-600 font-semibold hover:underline"
-              >
-                View All →
-              </button>
-            )}
-          </div>
-
-          {appliedServices.length > 0 ? (
-            <ul className="space-y-3">
-              {appliedServices.slice(0, 3).map((srv) => (
-                <li
-                  key={srv._id}
-                  className="border p-3 rounded flex justify-between items-center"
-                >
-                  <div>
-                    <p className="font-semibold">{srv.title}</p>
-                    <p className="text-sm text-gray-600">
-                      Offered By: {srv.offeredBy?.email}
-                    </p>
+            <div className="relative px-5 pb-6 sm:px-8 lg:px-10">
+              <div className="-mt-26 flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+                  <div className="relative h-28 w-28">
+                    {user?.profilePhoto ? (
+                      <img
+                        src={user.profilePhoto}
+                        alt="Profile"
+                        className="w-full h-full rounded-[1.75rem] border-4 border-white object-cover shadow-lg"
+                      />
+                    ) : (
+                      <div className="flex w-full h-full items-center justify-center rounded-[1.75rem] border-4 border-white bg-gradient-to-br from-sky-500 to-cyan-400 text-3xl font-bold text-white shadow-lg">
+                        {initials}
+                      </div>
+                    )}
+                    <span className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full border-2 border-white bg-emerald-500" />
                   </div>
 
-                  <span
-                    className={`px-3 py-1 rounded text-sm font-medium ${
-                      srv.status === "requested"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : srv.status === "processing"
-                        ? "bg-blue-100 text-blue-700"
-                        : srv.status === "completed"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-gray-100 text-gray-700"
-                    }`}
-                  >
-                    {srv.status === "open" && "⏳ Pending"}
-                    {srv.status === "processing" && "✅ Accepted (In Progress)"}
-                    {srv.status === "completed" && "🎉 Completed"}
-                    {srv.status === "rejected" && "❌ Rejected - Reopened"}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-gray-500">
-              You haven’t applied to any services yet.
-            </p>
-          )}
-        </div>
-        {/* My Reviews Recieved */}
-        <div
-          className="mt-8 bg-white p-6 rounded-xl shadow"
-          id="review-section"
-        >
-          <h3 className="text-xl font-bold text-blue-600 mb-4">
-            Reviews Received
-          </h3>
-          {paginatedReviews.length > 0 ? (
-            <>
-              <ul className="space-y-4">
-                {paginatedReviews.map((r, index) => (
-                  <li key={index} className="border p-4 rounded-xl">
-                    <p className="text-lg font-serif text-black">
-                      Service: <span>{r.serviceTitle}</span>
+                  <div className="pb-2">
+                    <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-600">
+                      TimeBank Profile
                     </p>
-                    <p className="text-yellow-500 mt-[-0.5em]">
-                      {"★".repeat(r.rating)}
-                      {"☆".repeat(5 - r.rating)}
+                    <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
+                      {user?.firstName || "User"} {user?.lastName || ""}
+                    </h1>
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 md:text-base">
+                      {user?.bio ||
+                        "Build trust, exchange skills, and keep your TimeBank profile polished so people can confidently collaborate with you."}
                     </p>
-                    <p className="text-gray-700">{r.comment}</p>
-                    <div className="flex items-center space-x-1 mb-2">
-                      <img
-                        src={r.profilePhoto || "https://ui-avatars.com/api/?name=" + r.createdBy}
-                        alt="Reviewer"
-                        className="w-4 h-4 rounded-full object-cover"
-                      />
-                      <p className="text-xs text-gray-500">{r.createdBy}</p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => navigate("/account")}
+                  className="hidden md:block items-center justify-center rounded-2xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-600"
+                >
+                  Edit profile
+                </button>
+
+                <button
+                  onClick={() => navigate("/account")}
+                  className="md:hidden block absolute top-30 right-2 items-center justify-center rounded-2xl bg-emerald-500 px-4 py-3 text-white shadow-sm transition hover:bg-emerald-600"
+                >
+                  <FaEdit />
+                </button>
+              </div>
+
+              <div className="mt-8 grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
+                <aside className="space-y-4">
+                  <div className="rounded-[1.75rem] border border-slate-200 bg-gradient-to-br from-white to-sky-50 p-5 shadow-sm">
+                    <div className="space-y-4">
+                      <DetailRow label="Email" value={user.email} />
+                      <DetailRow label="Phone" value={user.phone} />
+                      <DetailRow label="Location" value={addressLine || "-"} />
+                      <DetailRow label="Hours" value={user.availability || "-"} />
                     </div>
-                  </li>
-                ))}
-              </ul>
 
-              {/* Pagination Buttons */}
-              {totalPages > 1 && (
-                <div className="flex justify-center mt-6 space-x-2">
-                  {/* Previous Button */}
-                  <button
-                    onClick={() => {
-                      if (currentPage > 1) {
-                        setCurrentPage(currentPage - 1);
-                        const el = document.getElementById("review-section");
-                        el && el.scrollIntoView({ behavior: "smooth" });
-                      }
-                    }}
-                    disabled={currentPage === 1}
-                    className={`px-3 py-1 rounded-md text-sm font-medium ${
-                      currentPage === 1
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-gray-200 hover:bg-gray-300 text-gray-700"
-                    }`}
-                  >
-                    Previous
-                  </button>
+                    <div className="my-5 h-px bg-slate-200" />
 
-                  {/* Page Number Buttons */}
-                  {(() => {
-                    const pageButtons = [];
+                    <div className="flex items-center justify-between rounded-2xl bg-white/80 px-4 py-3">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                          Time Credits
+                        </p>
+                        <p className="mt-1 text-2xl font-bold text-slate-900">
+                          {user.wallet || 0}
+                        </p>
+                      </div>
+                      <div className="rounded-full bg-amber-100 px-3 py-2 text-sm font-semibold text-amber-700">
+                        Wallet
+                      </div>
+                    </div>
 
-                    // Helper to add page button
-                    const addPageButton = (page) => {
-                      pageButtons.push(
+                    <div className="mt-4 rounded-2xl bg-white/80 px-4 py-4">
+                      <div className="mb-2 flex items-center justify-between text-sm">
+                        <span className="font-medium text-slate-600">
+                          Profile completion
+                        </span>
+                        <span className="font-semibold text-emerald-600">
+                          {profileCompletion}%
+                        </span>
+                      </div>
+                      <div className="h-2 rounded-full bg-slate-200">
+                        <div
+                          className="h-2 rounded-full bg-gradient-to-r from-emerald-400 to-sky-500"
+                          style={{ width: `${profileCompletion}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
+                      Skills
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {skills.length > 0 ? (
+                        skills.map((skill, index) => (
+                          <span
+                            key={`${skill}-${index}`}
+                            className="rounded-full bg-sky-50 px-3 py-1.5 text-xs font-semibold text-sky-700 ring-1 ring-sky-200"
+                          >
+                            {skill}
+                          </span>
+                        ))
+                      ) : (
+                        <p className="text-sm text-slate-500">No skills added yet.</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <StatCard value={appliedServices.length} label="Services" />
+                    <StatCard value={reviews.length} label="Reviews" />
+                    <StatCard value={averageRating} label="Avg rating" />
+                    <StatCard value={experiences.length} label="Experience" />
+                  </div>
+
+                  <div className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
+                      Education
+                    </p>
+                    <div className="mt-4 space-y-3">
+                      {academics.length > 0 ? (
+                        academics.map((item, index) => (
+                          <div
+                            key={item._id || index}
+                            className="rounded-2xl border border-slate-100 bg-slate-50 p-4"
+                          >
+                            <p className="font-semibold text-slate-800 uppercase">
+                              {item.title || "Academic record"} | {item.year || ""} 
+                            </p> 
+                            <p className="mt-1 text-sm text-slate-600">
+                              {item.university || "-"} | {item.percentage || "-"}
+                            </p>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-sm text-slate-500">
+                          No education details added yet.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </aside>
+
+                <section className="min-w-0">
+                  <div className="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+                    <div className="flex flex-wrap items-center gap-3 border-b border-slate-200 pb-4">
+                      {tabs.map((tab) => (
                         <button
-                          key={page}
-                          onClick={() => {
-                            setCurrentPage(page);
-                            const el =
-                              document.getElementById("review-section");
-                            el && el.scrollIntoView({ behavior: "smooth" });
-                          }}
-                          className={`px-3 py-1 rounded-md text-sm font-medium ${
-                            currentPage === page
-                              ? "bg-blue-600 text-white"
-                              : "bg-gray-200 hover:bg-gray-300 text-gray-700"
+                          key={tab.id}
+                          onClick={() => setActiveTab(tab.id)}
+                          className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                            activeTab === tab.id
+                              ? "bg-slate-900 text-white shadow-sm"
+                              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                           }`}
                         >
-                          {page}
+                          {tab.label}
+                          <span className="ml-2 rounded-full bg-white/20 px-2 py-0.5 text-xs">
+                            {tab.id === "services"
+                              ? appliedServices.length
+                              : tab.id === "reviews"
+                              ? reviews.length
+                              : experiences.length}
+                          </span>
                         </button>
-                      );
-                    };
+                      ))}
+                    </div>
 
-                    if (totalPages <= 5) {
-                      // Show all pages if total <= 5
-                      for (let page = 1; page <= totalPages; page++) {
-                        addPageButton(page);
-                      }
-                    } else {
-                      if (currentPage <= 3) {
-                        // Show 1, 2, 3, ..., last page
-                        [1, 2, 3].forEach(addPageButton);
-                        pageButtons.push(
-                          <span key="ellipsis" className="px-2 py-1">
-                            ...
-                          </span>
-                        );
-                        addPageButton(totalPages);
-                      } else {
-                        // Default fallback: just show first, ellipsis, current, last
-                        addPageButton(1);
-                        pageButtons.push(
-                          <span key="ellipsis" className="px-2 py-1">
-                            ...
-                          </span>
-                        );
-                        addPageButton(currentPage);
-                        if (currentPage !== totalPages)
-                          addPageButton(totalPages);
-                      }
-                    }
+                    {activeTab === "services" && (
+                      <div className="mt-5 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h2 className="text-xl font-bold text-slate-900">
+                              My Service Requests
+                            </h2>
+                            <p className="mt-1 text-sm text-slate-500">
+                              A light, easy-to-scan overview of the services you have requested.
+                            </p>
+                          </div>
+                          {appliedServices.length > 3 && (
+                            <button
+                              onClick={() => navigate("/applied-services")}
+                              className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                            >
+                              View all
+                            </button>
+                          )}
+                        </div>
 
-                    return pageButtons;
-                  })()}
+                        {appliedServices.length > 0 ? (
+                          appliedServices.map((service) => {
+                            const statusMeta = getStatusMeta(service.status);
 
-                  {/* Next Button */}
-                  <button
-                    onClick={() => {
-                      if (currentPage < totalPages) {
-                        setCurrentPage(currentPage + 1);
-                        const el = document.getElementById("review-section");
-                        el && el.scrollIntoView({ behavior: "smooth" });
-                      }
-                    }}
-                    disabled={currentPage === totalPages}
-                    className={`px-3 py-1 rounded-md text-sm font-medium ${
-                      currentPage === totalPages
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-gray-200 hover:bg-gray-300 text-gray-700"
-                    }`}
-                  >
-                    Next
-                  </button>
-                </div>
-              )}
-            </>
-          ) : (
-            <p className="text-gray-500">No reviews received yet.</p>
-          )}
-        </div>
-      </div>
+                            return (
+                              <div
+                                key={service._id}
+                                className="rounded-[1.5rem] border border-slate-200 bg-gradient-to-r from-white to-slate-50 p-5 shadow-sm"
+                              >
+                                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                                  <div className="min-w-0">
+                                    <p className="text-lg font-semibold text-slate-900">
+                                      {service.title}
+                                    </p>
+                                    <p className="mt-1 text-sm text-slate-500">
+                                      Offered by{" "}
+                                      <span className="font-medium text-sky-700">
+                                        {service.offeredBy?.email || "Unknown user"}
+                                      </span>
+                                    </p>
+                                    {service.description && (
+                                      <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
+                                        {service.description}
+                                      </p>
+                                    )}
+                                  </div>
+
+                                  <span
+                                    className={`inline-flex items-center self-start rounded-full px-4 py-2 text-sm font-semibold ${statusMeta.classes}`}
+                                  >
+                                    <span className="mr-2 h-2 w-2 rounded-full bg-current opacity-70" />
+                                    {statusMeta.label}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <div className="rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center">
+                            <p className="text-base font-medium text-slate-700">
+                              You have not applied to any services yet.
+                            </p>
+                            <p className="mt-2 text-sm text-slate-500">
+                              Explore the services page and request help from the community when you are ready.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {activeTab === "reviews" && (
+                      <div className="mt-5" id="review-section">
+                        <div className="grid gap-4 xl:grid-cols-[280px_minmax(0,1fr)]">
+                          <div className="rounded-[1.5rem] border border-slate-200 bg-gradient-to-br from-amber-50 to-white p-5 shadow-sm">
+                            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-amber-500">
+                              Rating overview
+                            </p>
+                            <p className="mt-4 text-5xl font-bold text-slate-900">
+                              {averageRating}
+                            </p>
+                            <p className="mt-2 text-amber-500">
+                              {"\u2605".repeat(Math.round(Number(averageRating)))}
+                              {"\u2606".repeat(5 - Math.round(Number(averageRating)))}
+                            </p>
+                            <p className="mt-2 text-sm text-slate-500">
+                              {reviews.length} review{reviews.length === 1 ? "" : "s"}
+                            </p>
+                          </div>
+
+                          <div className="space-y-4">
+                            {paginatedReviews.length > 0 ? (
+                              paginatedReviews.map((review, index) => (
+                                <div
+                                  key={review._id || index}
+                                  className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm"
+                                >
+                                  <div className="flex items-start justify-between gap-4">
+                                    <div className="flex items-center gap-3">
+                                      <img
+                                        src={
+                                          review.profilePhoto ||
+                                          `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                            review.createdBy || "User"
+                                          )}&background=0ea5e9&color=fff`
+                                        }
+                                        alt="Reviewer"
+                                        className="h-12 w-12 rounded-2xl object-cover"
+                                      />
+                                      <div>
+                                        <p className="font-semibold text-slate-900">
+                                          {review.createdBy || "Anonymous"}
+                                        </p>
+                                        <p className="text-sm text-slate-500">
+                                          {review.serviceTitle || "Service review"}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <p className="text-xs text-slate-400">
+                                      {review.createdAt
+                                        ? new Date(review.createdAt).toLocaleDateString()
+                                        : ""}
+                                    </p>
+                                  </div>
+
+                                  <p className="mt-4 text-amber-500">
+                                    {"\u2605".repeat(review.rating || 0)}
+                                    {"\u2606".repeat(5 - (review.rating || 0))}
+                                  </p>
+                                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                                    {review.comment || "No written review provided."}
+                                  </p>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center">
+                                <p className="text-base font-medium text-slate-700">
+                                  No reviews received yet.
+                                </p>
+                                <p className="mt-2 text-sm text-slate-500">
+                                  Your future collaborations will appear here.
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {totalPages > 1 && (
+                          <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+                            <button
+                              onClick={() => {
+                                if (currentPage > 1) {
+                                  setCurrentPage(currentPage - 1);
+                                  const el = document.getElementById("review-section");
+                                  el && el.scrollIntoView({ behavior: "smooth" });
+                                }
+                              }}
+                              disabled={currentPage === 1}
+                              className={`rounded-full px-4 py-2 text-sm font-semibold ${
+                                currentPage === 1
+                                  ? "cursor-not-allowed bg-slate-100 text-slate-400"
+                                  : "bg-slate-900 text-white hover:bg-slate-800"
+                              }`}
+                            >
+                              Previous
+                            </button>
+
+                            {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+                              (page) => (
+                                <button
+                                  key={page}
+                                  onClick={() => {
+                                    setCurrentPage(page);
+                                    const el = document.getElementById("review-section");
+                                    el && el.scrollIntoView({ behavior: "smooth" });
+                                  }}
+                                  className={`h-10 w-10 rounded-full text-sm font-semibold ${
+                                    currentPage === page
+                                      ? "bg-sky-500 text-white"
+                                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                  }`}
+                                >
+                                  {page}
+                                </button>
+                              )
+                            )}
+
+                            <button
+                              onClick={() => {
+                                if (currentPage < totalPages) {
+                                  setCurrentPage(currentPage + 1);
+                                  const el = document.getElementById("review-section");
+                                  el && el.scrollIntoView({ behavior: "smooth" });
+                                }
+                              }}
+                              disabled={currentPage === totalPages}
+                              className={`rounded-full px-4 py-2 text-sm font-semibold ${
+                                currentPage === totalPages
+                                  ? "cursor-not-allowed bg-slate-100 text-slate-400"
+                                  : "bg-slate-900 text-white hover:bg-slate-800"
+                              }`}
+                            >
+                              Next
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {activeTab === "experience" && (
+                      <div className="mt-5 space-y-5">
+                        <div>
+                          <h2 className="text-xl font-bold text-slate-900">
+                            Experience Timeline
+                          </h2>
+                          <p className="mt-1 text-sm text-slate-500">
+                            Highlight the work, volunteering, or community contributions that build trust on your profile.
+                          </p>
+                        </div>
+
+                        {experiences.length > 0 ? (
+                          <div className="space-y-5">
+                            {experiences.map((item, index) => (
+                              <div
+                                key={item._id || index}
+                                className="rounded-[1.5rem] border border-slate-200 bg-gradient-to-r from-white to-cyan-50/40 p-5 shadow-sm"
+                              >
+                                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                                  <div>
+                                    <p className="text-lg font-semibold text-slate-900">
+                                      {item.title || item.role || "Experience"}
+                                    </p>
+                                    <p className="mt-1 text-sm font-medium text-sky-700">
+                                      {item.company || item.organization || "Community work"}
+                                    </p>
+                                    <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
+                                      {item.description ||
+                                        "Add a short description here so others can understand your background and strengths."}
+                                    </p>
+                                  </div>
+
+                                  <div className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
+                                    {item.years || "Timeline"} Years
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center">
+                            <p className="text-base font-medium text-slate-700">
+                              No experience details added yet.
+                            </p>
+                            <p className="mt-2 text-sm text-slate-500">
+                              Add your work, volunteering, or personal projects from the account page.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
       <Footer />
 
-      {/* Animated Congratulations Popup */}
       {welcome && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-50">
-          <div className="relative bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 p-8 rounded-3xl text-center shadow-[0_0_40px_rgba(59,130,246,0.5)] border border-blue-400/30 w-[360px]">
-            <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-pink-500 to-yellow-400 p-2 rounded-full shadow-lg">
-              <span className="text-white text-xl">🎉</span>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/35 px-4 backdrop-blur-sm">
+          <div className="relative w-full max-w-md rounded-[2rem] border border-white/70 bg-white p-8 text-center shadow-[0_35px_80px_rgba(14,165,233,0.22)]">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-amber-300 via-orange-300 to-pink-300 text-2xl shadow-lg">
+              *
             </div>
-
-            <h2 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-cyan-300 to-purple-400 mt-4">
-              Congratulations!
+            <h2 className="mt-5 text-3xl font-bold text-slate-900">
+              Welcome to TimeBank
             </h2>
-
-            <p className="text-gray-200 text-lg mt-2 font-medium">
+            <p className="mt-2 text-lg font-medium text-sky-700">
               {user?.firstName} {user?.lastName}
             </p>
-
-            <p className="text-gray-400 mt-4 mb-6 leading-relaxed">
-              You’ve successfully joined TimeBank! Click below to claim your{" "}
-              <br />{" "}
-              <span className="text-blue-300 text-xl font-semibold">
-                50 Time Credits
-              </span>
-              .
+            <p className="mt-4 text-sm leading-6 text-slate-600">
+              Your account is ready. Claim your starter reward and begin exchanging time, skills, and support with the community.
             </p>
-
+            <div className="mt-6 rounded-2xl bg-sky-50 px-4 py-3 text-sky-700">
+              <span className="text-2xl font-bold">50</span>
+              <span className="ml-2 text-sm font-semibold uppercase tracking-[0.2em]">
+                Time Credits
+              </span>
+            </div>
             <button
               onClick={() => setWelcome(false)}
-              className="px-6 py-2 rounded-full font-semibold text-white bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 transition-all"
+              className="mt-6 inline-flex rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
             >
-              Claim
+              Claim credits
             </button>
           </div>
         </div>
